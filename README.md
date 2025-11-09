@@ -1,4 +1,4 @@
-<img src="./github/App-Banner.jpg">
+<img src="./Github/App-Banner.jpg">
 
 <div align="center">
 
