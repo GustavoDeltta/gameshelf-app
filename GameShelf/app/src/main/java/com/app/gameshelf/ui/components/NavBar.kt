@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,7 +62,7 @@ fun NavBar(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    modifier = Modifier.size(30.dp),
+                    modifier = Modifier.size(25.dp),
                     imageVector = when (route) {
                         "home" -> Icons.Default.Home
                         "search" -> Icons.Default.Search
@@ -76,6 +77,7 @@ fun NavBar(navController: NavController) {
                 if (selected){
                     Text(
                         "${route}",
+                        style = MaterialTheme.typography.labelLarge,
                         color = if (selected) Color(0xFF2C2C2E) else Color.White,
                         modifier = Modifier
                             .padding(start = 10.dp)
