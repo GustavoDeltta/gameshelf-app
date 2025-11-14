@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,9 +40,9 @@ fun NavBar(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(CircleShape)
-            .background(Color(0xFF1C1C1E))
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         items.forEach { route ->
@@ -49,17 +50,20 @@ fun NavBar(navController: NavController) {
             Row (
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(if (selected) Color.White else Color.Transparent)
-                    .border(width = 1.dp, color = Color.White, shape = CircleShape)
-                    .padding(15.dp)
-                    .padding(horizontal = if (selected) 15.dp else 0.dp)
+                    .height(50.dp)
+                    .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                    .border(width = 1.dp, color = MaterialTheme.colorScheme.primary, shape = CircleShape)
+                    .then(
+                        if (selected) Modifier.weight(1f) else Modifier.width(50.dp)
+                    )
                     .clickable {
                         if (!selected) navController.navigate(route) {
                             popUpTo("home") { inclusive = false }
                             launchSingleTop = true
                         }
                     },
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
             ) {
                 Icon(
                     modifier = Modifier.size(25.dp),
@@ -71,14 +75,20 @@ fun NavBar(navController: NavController) {
                         else -> Icons.Default.Home
                     },
                     contentDescription = route,
-                    tint = if (selected) Color(0xFF2C2C2E) else Color.White
+                    tint = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
                 )
 
                 if (selected){
                     Text(
-                        "${route}",
+                        text = when (route) {
+                            "home" -> "Inicio"
+                            "search" -> "Procurar"
+                            "news" -> "Novidades"
+                            "profile" -> "Conta"
+                            else -> "Inicio"
+                        },
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (selected) Color(0xFF2C2C2E) else Color.White,
+                        color = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(start = 10.dp)
                     )
