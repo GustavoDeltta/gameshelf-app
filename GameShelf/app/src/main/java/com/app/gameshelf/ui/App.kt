@@ -21,6 +21,7 @@ import com.app.gameshelf.ui.navigation.AppNavGraph
 fun App() {
     val navController = rememberNavController()
 
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()

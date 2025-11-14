@@ -4,13 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.*
 import com.app.gameshelf.ui.App
 import com.app.gameshelf.ui.theme.GameShelfTheme
 
@@ -19,9 +13,33 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GameShelfTheme {
-                App()
+            // Global state for theme
+            var isDarkTheme by remember { mutableStateOf(true) }
+
+            AppThemeProvider(
+                isDarkTheme = isDarkTheme,
+                onThemeChange = { isDark -> isDarkTheme = isDark }
+            ) {
+                GameShelfTheme(darkTheme = isDarkTheme) {
+                    App()
+                }
             }
         }
     }
+}
+
+object ThemeState {
+    var isDarkTheme by mutableStateOf(true)
+    var onThemeChange: (Boolean) -> Unit = {}
+}
+
+@Composable
+fun AppThemeProvider(
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    ThemeState.isDarkTheme = isDarkTheme
+    ThemeState.onThemeChange = onThemeChange
+    content()
 }
