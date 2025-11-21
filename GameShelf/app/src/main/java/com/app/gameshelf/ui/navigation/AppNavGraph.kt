@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.app.gameshelf.ui.screens.game.GameScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.app.gameshelf.ui.screens.home.HomeScreen
 import com.app.gameshelf.ui.screens.news.NewsScreen
@@ -31,8 +32,12 @@ fun AppNavGraph(navController: NavHostController) {
         }
     ) {
         composable("home") { HomeScreen() }
-        composable("search") { SearchScreen() }
+        composable("search") { SearchScreen( navController = navController) }
         composable("news") { NewsScreen() }
         composable("profile") { ProfileScreen() }
+        composable("game/{gameId}") { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
+            GameScreen(gameId = gameId)
+        }
     }
 }

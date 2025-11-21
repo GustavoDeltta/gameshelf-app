@@ -1,4 +1,4 @@
-package com.app.gameshelf.ui.components
+package com.app.gameshelf.ui.components.navBar
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -58,13 +58,10 @@ fun NavBar(navController: NavController) {
         items.forEach { route ->
             val selected = currentRoute == route
 
-            // Animation card icon
+            // Anmation card
             val itemWidth by animateDpAsState(
                 targetValue = if (selected) 200.dp else 50.dp,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                ),
+                animationSpec = tween(durationMillis = 300),
                 label = "width_animation"
             )
 
