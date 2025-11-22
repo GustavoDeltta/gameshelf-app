@@ -34,7 +34,6 @@ fun GameCard(
     val request = remember(imageUrl) {
         ImageRequest.Builder(context)
             .data(imageUrl)
-            //.size(128) // reduz o peso da imagem drasticamente
             .crossfade(300)
             .memoryCacheKey(imageUrl)
             .diskCacheKey(imageUrl)

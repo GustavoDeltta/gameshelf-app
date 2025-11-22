@@ -37,7 +37,7 @@ fun AppNavGraph(navController: NavHostController) {
         composable("profile") { ProfileScreen() }
         composable("game/{gameId}") { backStackEntry ->
             val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-            GameScreen(gameId = gameId)
+            GameScreen(gameId = gameId, NavController = navController)
         }
     }
 }
