@@ -9,11 +9,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.app.gameshelf.R
 
 @Composable
-fun backButton (navigation: NavController){
+fun backButton (onBackClick: () -> Unit){
     IconButton(
         modifier = Modifier
             .padding(top = 20.dp, start = 16.dp)
@@ -23,7 +22,7 @@ fun backButton (navigation: NavController){
                 shape = androidx.compose.foundation.shape.CircleShape
             ),
         onClick = {
-            navigation.popBackStack()
+            onBackClick()
         }
     ) {
         Icon(

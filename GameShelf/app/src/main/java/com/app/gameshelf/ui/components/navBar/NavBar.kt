@@ -34,7 +34,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.app.gameshelf.R
 
-// Item isolado para evitar recomposição de todos
 @Composable
 private fun NavBarItem(
     route: String,
@@ -42,7 +41,7 @@ private fun NavBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Animação simplificada - só width para items não selecionados
+
     val itemWidth by animateDpAsState(
         targetValue = if (selected) 200.dp else 50.dp,
         animationSpec = tween(durationMillis = 250),
@@ -79,7 +78,6 @@ private fun NavBarItem(
             tint = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
         )
 
-        // Animação de texto simplificada
         AnimatedVisibility(
             visible = selected,
             enter = fadeIn(animationSpec = tween(200, delayMillis = 50)),
@@ -118,7 +116,6 @@ fun NavBar(navController: NavController) {
         items.forEach { route ->
             val selected = currentRoute == route
 
-            // Item selecionado usa weight, outros têm largura fixa
             if (selected) {
                 NavBarItem(
                     route = route,

@@ -5,19 +5,19 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.app.gameshelf.ui.screens.game.GameScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.app.gameshelf.ui.screens.home.HomeScreen
 import com.app.gameshelf.ui.screens.news.NewsScreen
 import com.app.gameshelf.ui.screens.profile.ProfileScreen
 import com.app.gameshelf.ui.screens.search.SearchScreen
+import com.app.gameshelf.ui.navigation.routes.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     AnimatedNavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = Route.Home.route,
         enterTransition = {
             slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)
         },
@@ -31,13 +31,24 @@ fun AppNavGraph(navController: NavHostController) {
             slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
         }
     ) {
-        composable("home") { HomeScreen() }
-        composable("search") { SearchScreen( navController = navController) }
-        composable("news") { NewsScreen() }
-        composable("profile") { ProfileScreen() }
-        composable("game/{gameId}") { backStackEntry ->
-            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-            GameScreen(gameId = gameId, NavController = navController)
+        // Main screens
+        composable(Route.Home.route) {
+            HomeScreen(navController = navController)
         }
+        composable(Route.Search.route) {
+            SearchScreen(navController = navController)
+        }
+        composable(Route.News.route) {
+            NewsScreen(navController = navController)
+        }
+        composable(Route.Profile.route) {
+            ProfileScreen(navController = navController)
+        }
+
+        // Nav graphs for each screen
+        gameNavGraph(navController)
+        // TODO: Add more nav graphs
+        // profileNavGraph(navController)
+        // searchNavGraph(navController)
     }
 }
