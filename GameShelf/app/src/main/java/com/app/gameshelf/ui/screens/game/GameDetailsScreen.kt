@@ -3,7 +3,6 @@ package com.app.gameshelf.ui.screens.game
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -88,12 +87,36 @@ fun GameDetailsScreen(
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp),
+                .padding(top = 70.dp),
         ){
             when (category) {
                 "conquistas" -> {
-                    items(10) {
-                        AchievementCard()
+                    items(3) {
+                        AchievementCard(
+                            unLockedet = true,
+                            urlImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2161700/72dcd4e4707d8feb2fe31ebabeec7cf177dc1c8e.jpg",
+                            hidden = false,
+                            name = "Poder Despertado",
+                            description = "Obteve Orfeu.(Somente na história principal de Persona 3 Reload)"
+                        )
+                    }
+                    items(2){
+                        AchievementCard(
+                            unLockedet = false,
+                            urlImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2161700/72dcd4e4707d8feb2fe31ebabeec7cf177dc1c8e.jpg",
+                            hidden = false,
+                            name ="Conquista bloqueada",
+                            description = "teste de conquista bloqueada"
+                        )
+                    }
+                    items(1){
+                        AchievementCard(
+                            unLockedet = false,
+                            urlImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2161700/72dcd4e4707d8feb2fe31ebabeec7cf177dc1c8e.jpg",
+                            hidden = true,
+                            name ="Conquista bloqueada",
+                            description = "teste de conquista bloqueada"
+                        )
                     }
                 }
 

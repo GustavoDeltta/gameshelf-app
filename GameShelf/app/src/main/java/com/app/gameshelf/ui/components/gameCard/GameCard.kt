@@ -45,7 +45,7 @@ fun GameCard(
             .aspectRatio(2f / 3f)
             .clickable { onGameClick(gameId) },
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        //elevation = CardDefaults.cardElevation(4.dp)
     ) {
         AsyncImage(
             model = request,
