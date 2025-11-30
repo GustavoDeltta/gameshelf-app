@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.app.gameshelf.ui.screens.game.GameScreen
-import com.app.gameshelf.ui.screens.game.GameDetailsScreen
+import com.app.gameshelf.ui.screens.gameDetails.GameDetailsScreen
 import com.app.gameshelf.ui.navigation.popBackTo
 
 fun NavGraphBuilder.gameNavGraph(navController: NavHostController) {

@@ -35,6 +35,7 @@ import coil.compose.AsyncImage
 import com.app.gameshelf.ui.components.backButton.backButton
 import com.app.gameshelf.R
 import com.app.gameshelf.ui.components.buttonAddTo.ButtonAddTo
+import com.app.gameshelf.ui.components.highLightAchievements.highLightAchievements
 
 @Composable
 fun GameScreen(
@@ -269,7 +270,7 @@ fun GameScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 15.dp),
+                .padding(vertical = 15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -288,5 +289,7 @@ fun GameScreen(
                 modifier = Modifier.clickable{onGameDetailsClick("conquistas")}
             )
         }
+
+        highLightAchievements()
     }
 }

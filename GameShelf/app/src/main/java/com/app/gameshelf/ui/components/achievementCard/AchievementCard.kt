@@ -1,21 +1,23 @@
 package com.app.gameshelf.ui.components.achievementCard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -32,21 +34,29 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.app.gameshelf.R
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchievementCard(
-    unLockedet: Boolean = false,
+    unlocked: Boolean = false,
     urlImage: String,
     hidden: Boolean = false,
     name: String,
     description: String,
+    playerPercentUnlocked: String,
+    playerPercentUnlockedToFloat: Float = 0f,
 ){
 
     val sheetState = rememberModalBottomSheetState()
@@ -54,12 +64,24 @@ fun AchievementCard(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Card(
+        elevation = CardDefaults.cardElevation(0.dp),
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(
+                if (!unlocked || hidden)
+                    Modifier.border(
+                        2.dp,
+                        MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(0.dp)
+                    )
+                else Modifier
+            ),
         shape = RoundedCornerShape(0.dp),
         colors = CardColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor =
+               if (unlocked) MaterialTheme.colorScheme.surface
+               else MaterialTheme.colorScheme.background,
             disabledContainerColor = MaterialTheme.colorScheme.surface,
             disabledContentColor = MaterialTheme.colorScheme.onSurface
         ),
@@ -80,52 +102,62 @@ fun AchievementCard(
                     .size(75.dp)
                     .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             ){
-                if (!hidden) {
+
+                if (unlocked || !hidden) {
                     AsyncImage(
-                        model = urlImage,
-                        contentDescription = "Foto da conquista ${name}",
-                        colorFilter =
-                            if (!unLockedet) ColorFilter.colorMatrix(ColorMatrix().apply {
-                                setToSaturation(
-                                    0f
-                                )
-                            })
-                            else null,
-                        modifier = Modifier.size(75.dp),
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(urlImage)
+                            .crossfade(true)
+                            .build(),
+                        //colorFilter = if (!unlocked) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation( 0f ) }) else null,
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
+                        modifier = Modifier.size(75.dp)
                     )
                 }
 
                 Icon(
-                    painter =
-                        if (!unLockedet && !hidden) androidx.compose.ui.res.painterResource(id = R.drawable.ic_lock)
-                        else if (hidden) androidx.compose.ui.res.painterResource(id = R.drawable.ic_quest)
-                        else androidx.compose.ui.res.painterResource(id = R.drawable.ic_lock),
+                    painter = painterResource(id =
+                        if (hidden == true && unlocked == false)
+                            R.drawable.ic_quest
+                        else if (unlocked == false)
+                            R.drawable.ic_lock
+                        else
+                            // Placeholder for unlocked, will be transparent
+                            R.drawable.ic_home
+                    ),
                     contentDescription =
-                        if (!unLockedet && !hidden) "Lockedet Icon"
-                        else if (hidden) "Hidden Icon"
-                        else "imagem da conquista",
+                        if (hidden) "Hidden Icon"
+                        else if (!unlocked) "Locked Icon"
+                        else "Unlocked Icon",
                     tint =
-                        if (!unLockedet && !hidden) Color.White.copy(alpha = 0.8f)
-                        else if (hidden) MaterialTheme.colorScheme.primary
-                        else Color.White.copy(alpha = 0f),
+                        if (hidden == true && unlocked == false)
+                            MaterialTheme.colorScheme.primary
+                        else if (unlocked == false)
+                            Color.White.copy(alpha = 0.9f)
+                        else
+                            Color.White.copy(alpha = 0f),
                     modifier = Modifier
                         .size(30.dp)
-                        .shadow(4.dp),
+                        .then(
+                            if (!unlocked && !hidden) Modifier.shadow(5.dp, ambientColor = Color.Black, spotColor = Color.Black, shape = RoundedCornerShape(5.dp))
+                            else Modifier
+                        ),
                 )
 
             }
 
             Column(
                 modifier = Modifier
-                    .padding(start = 20.dp)
+                    .padding(start = 20.dp, end = 10.dp)
             ) {
                 Text(
                     text =
-                        if (!hidden) name
+                        if (unlocked || !hidden) name
                         else "Conquista Oculta",
                     style = MaterialTheme.typography.titleMedium,
                     color =
-                        if (!unLockedet) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        if (!unlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                         else MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier
@@ -134,8 +166,10 @@ fun AchievementCard(
 
                 Text(
                     text =
-                        if (!hidden) description
+                        if (unlocked || !hidden) description
                         else "Detalhes ocultos, clique para exibir spoiler da conquista",
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     lineHeight = 19.sp,
@@ -150,45 +184,91 @@ fun AchievementCard(
                 showBottomSheet = false
             },
             sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) {
-            Row(
+            Column(
                 modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 10.dp, horizontal = 16.dp),
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                ) {
 
-                AsyncImage(
-                    model = urlImage,
-                    contentDescription = "Foto da conquista ${name}",
-                    modifier = Modifier.size(75.dp),
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(urlImage)
+                            .crossfade(true)
+                            .build(),
+                        //placeholder = painterResource(R.drawable.placeholder),
+                        //error = painterResource(R.drawable.placeholder),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
+                        modifier = Modifier.size(75.dp)
                     )
 
-                Column(
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 20.dp)
+                    ) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier
+                                .padding(bottom = 5.dp)
+                        )
+
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            lineHeight = 19.sp,
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
                     modifier = Modifier
-                        .padding(start = 20.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp)
                 ) {
                     Text(
-                        text = name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .padding(bottom = 5.dp)
-                    )
-
-                    Text(
-                        text = description,
+                        "Porcentagem global dos jogadores:",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                         lineHeight = 19.sp,
                     )
+
+                    Text(
+                        playerPercentUnlocked,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color =
+                            if (playerPercentUnlockedToFloat < 0.10f) MaterialTheme.colorScheme.tertiary
+                            else MaterialTheme.colorScheme.primary,
+                        lineHeight = 19.sp,
+                    )
                 }
+
+
+                LinearProgressIndicator(
+                    progress = playerPercentUnlockedToFloat,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    color =
+                        if (playerPercentUnlockedToFloat < 0.10f) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.onSecondary,
+                    strokeCap = StrokeCap.Round,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(9.dp)
+                )
             }
 
             Spacer(modifier = Modifier.padding(bottom = 200.dp))
         }
     }
 }
-
-
