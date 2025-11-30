@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults.buttonColors
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,11 +22,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -34,6 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.app.gameshelf.R
+import com.app.gameshelf.data.model.Achievement
+import com.app.gameshelf.data.model.AchievementData
+import com.app.gameshelf.ui.components.achievementCard.AchievementBottomSheet
 import com.app.gameshelf.ui.components.achievementCard.AchievementCard
 import com.app.gameshelf.ui.components.backButton.backButton
 
@@ -76,7 +83,6 @@ fun GameDetailsScreen(
         modifier = Modifier
             .fillMaxWidth()
             .height(290.dp)
-            .blur(10.dp)
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -95,7 +101,7 @@ fun GameDetailsScreen(
             .fillMaxWidth()
             .padding(top = 110.dp)
             .padding(horizontal = 16.dp),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             "Persona 3 Reload",
@@ -105,12 +111,24 @@ fun GameDetailsScreen(
         )
 
         Text(
-            "$category",
+            category,
             style = MaterialTheme.typography.titleLarge,
             fontSize = 20.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
             color = MaterialTheme.colorScheme.primary
         )
+
+        var selectedAchievement by remember { mutableStateOf<Achievement?>(null) }
+        var showUnlocked by remember { mutableStateOf(true) }
+        var showLocked by remember { mutableStateOf(true) }
+
+        selectedAchievement?.let { achievement ->
+            AchievementBottomSheet(
+                achievement = achievement,
+                gameID = gameId,
+                onDismiss = { selectedAchievement = null }
+            )
+        }
 
         LazyColumn(
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp),
@@ -145,66 +163,118 @@ fun GameDetailsScreen(
                         }
                     }
 
-                    // Unlocked achievements
-                    if (uiState.achievements.any { it.achieved }) {
-                        item {
+                    // Unlocked achievements header
+                    if (uiState.unlockedAchievements.isNotEmpty()) {
+                        item(key = "unlocked_header") {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(
-                                    "Conquista desbloqueadas",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(end = 10.dp)
-                                )
+                                Button (
+                                    onClick = { showUnlocked = !showUnlocked },
+                                    modifier = Modifier
+                                        .padding(end = 10.dp)
+                                        .height(34.dp),
+                                    colors = ButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        contentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                        disabledContainerColor = MaterialTheme.colorScheme.background,
+                                        disabledContentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text(
+                                        "${uiState.unlockedAchievements.size} Conquistas desbloqueadas",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(end = 15.dp)
+                                    )
 
-                               HorizontalDivider(thickness = 2.dp)
-                            }
-                        }
-                    }
-
-                    // Load unlocked achievements
-                    items(uiState.achievements.filter { it.achieved }){
-                        AchievementCard(
-                            unlocked = it.achieved,
-                            urlImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameId}/${it.icon}",
-                            hidden = it.hidden,
-                            name = it.name,
-                            description = it.description,
-                            playerPercentUnlocked = "${it.playerPercentUnlocked}%",
-                            playerPercentUnlockedToFloat = it.playerPercentUnlockedToFloat()
-                        )
-                    }
-
-                    // locked achievements
-                    if (uiState.achievements.any { !it.achieved }) {
-                        item {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    "Conquista bloqueadas",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(end = 10.dp)
-                                )
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .then(
+                                                if (showUnlocked) Modifier.rotate(270f) else Modifier.rotate(180f)
+                                            )
+                                    )
+                                }
 
                                 HorizontalDivider(thickness = 2.dp)
                             }
                         }
                     }
 
-                    // Carregar apenas os bloqueados
-                    items(uiState.achievements.filter { it.achieved == false }){
-                        AchievementCard(
-                            unlocked = it.achieved,
-                            urlImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameId}/${it.icon}",
-                            hidden = it.hidden,
-                            name = it.name,
-                            description = it.description,
-                            playerPercentUnlocked = "${it.playerPercentUnlocked}%",
-                            playerPercentUnlockedToFloat = it.playerPercentUnlockedToFloat()
-                        )
+                    if (showUnlocked) {
+                        items(
+                            items = uiState.unlockedAchievements,
+                            key = { it.name },
+                            contentType = { "achievement" }
+                        ) { item ->
+                            AchievementCard(
+                                achievement = item,
+                                gameID = gameId,
+                                onClick = {
+                                    selectedAchievement = item
+                                }
+                            )
+                        }
+                    }
+
+                    if (uiState.lockedAchievements.isNotEmpty()) {
+                        item(key = "locked_header") {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Button (
+                                    onClick = { showLocked = !showLocked },
+                                    modifier = Modifier
+                                        .padding(end = 10.dp)
+                                        .height(34.dp),
+                                    colors = ButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        contentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                        disabledContainerColor = MaterialTheme.colorScheme.background,
+                                        disabledContentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text(
+                                        "${uiState.lockedAchievements.size} Conquistas bloqueadas",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(end = 15.dp)
+                                    )
+
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .then(
+                                                if (showLocked) Modifier.rotate(270f) else Modifier.rotate(180f)
+                                            )
+                                    )
+                                }
+
+                                HorizontalDivider(thickness = 2.dp)
+                            }
+                        }
+                    }
+
+                    // Locked achievements list
+                    if (showLocked) {
+                        items(
+                            items = uiState.lockedAchievements,
+                            key = { it.name },
+                            contentType = { "achievement" }
+                        ) { item ->
+                            AchievementCard(
+                                achievement = item,
+                                gameID = gameId,
+                                onClick = {
+                                    selectedAchievement = item
+                                }
+                            )
+                        }
                     }
                 }
 
