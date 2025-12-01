@@ -39,7 +39,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.app.gameshelf.R
 import com.app.gameshelf.data.model.Achievement
-import com.app.gameshelf.data.model.AchievementData
 import com.app.gameshelf.ui.components.achievementCard.AchievementBottomSheet
 import com.app.gameshelf.ui.components.achievementCard.AchievementCard
 import com.app.gameshelf.ui.components.backButton.backButton
@@ -49,6 +48,7 @@ import com.app.gameshelf.ui.components.backButton.backButton
 fun GameDetailsScreen(
     gameId: String,
     category: String,
+    name: String,
     playerId: String = "76561199157114802",
     onBackClick: () -> Unit,
     viewModel: GameViewModel = viewModel()
@@ -104,7 +104,7 @@ fun GameDetailsScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Persona 3 Reload",
+            name,
             style = MaterialTheme.typography.titleLarge,
             fontSize = 30.sp,
             color = MaterialTheme.colorScheme.primary

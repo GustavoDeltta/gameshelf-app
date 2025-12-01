@@ -11,8 +11,8 @@ sealed class Route(val route: String) {
     object Game : Route("game/{gameId}") {
         fun createRoute(gameId: String) = "game/$gameId"
     }
-    object GameMoreInfo : Route("game/{gameId}/{category}/more-info") {
-        fun createRoute(gameId: String, category: String) = "game/$gameId/$category/more-info"
+    object GameMoreInfo : Route("game/{gameId}/{category}/{name}/more-info") {
+        fun createRoute(gameId: String, category: String, name: String) = "game/$gameId/$category/$name/more-info"
     }
 
     // TODO: Add more routes

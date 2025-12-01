@@ -1,6 +1,8 @@
 package com.app.gameshelf.ui.components.highLightAchievements
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,16 +32,39 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.app.gameshelf.R
+import com.app.gameshelf.ui.theme.GameShelfTheme
 
 @Composable
-fun highLightAchievements (){
+fun highLightAchievements (
+    onClickListener: () -> Unit,
+    unLocked: String,
+    locked: String,
+    progress: Float,
+    lastUnlockedImage: String,
+    lastUnlockedName: String,
+    lastUnlockedDescription: String,
+    listOfLastUnlocked: List<String>
+){
+
+    if (unLocked == locked) {
+        return allUnlockedAchievements(
+            onClickListener = onClickListener,
+            unLocked = unLocked
+        )
+    }
+
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable(
+                onClick = onClickListener
+            ),
         colors = CardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = Color.White,
@@ -56,25 +83,22 @@ fun highLightAchievements (){
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "43/56",
+                    text = "${unLocked}/${locked}",
                     style = MaterialTheme.typography.labelMedium,
-                    fontSize = 13.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 )
 
                 LinearProgressIndicator(
-                    progress = 0.6f,
+                    progress = progress,
                     trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                     color = MaterialTheme.colorScheme.onSecondary,
                     strokeCap = StrokeCap.Round,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp)
-                        .height(7.dp)
+                        .padding(top = 5.dp)
+                        .height(5.dp)
                 )
-
-                // Last Added Achievement
-                val imageUrl = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2161700/0e663e02f247d96c7831a475cb94207c915edef7.jpg"
 
                 Row(
                     modifier = Modifier
@@ -84,36 +108,51 @@ fun highLightAchievements (){
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(75.dp)
+                            .size(60.dp)
                             .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                     ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(imageUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentScale = ContentScale.Fit,
-                            contentDescription = null,
-                            modifier = Modifier.size(75.dp)
-                        )
+                        if (unLocked == 0.toString()){
+                            Image(
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ph_without_achievements),
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
+                        else {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(lastUnlockedImage)
+                                    .crossfade(true)
+                                    .build(),
+                                contentScale = ContentScale.Fit,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
                     }
 
                     Column(
                         modifier = Modifier
                             .padding(start = 20.dp)
-                            .fillMaxSize(),
+                            .height(60.dp),
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Um Novo Laço",
+                            text=
+                                if(unLocked == 0.toString() ) "Nenhuma conquista desbloqueada"
+                                else lastUnlockedName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
                         )
                         Text(
-                            "Faça uma nova amizade e descubra um novo arcano",
+                            text = if(unLocked == 0.toString() ) "Jogue e desbloquie conquistas."
+                            else lastUnlockedDescription,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            lineHeight = 19.sp,
                             maxLines = 2,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
@@ -124,28 +163,131 @@ fun highLightAchievements (){
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 15.dp)
+                        .padding(top = 15.dp, bottom = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(75.dp)
-                            .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(imageUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentScale = ContentScale.Fit,
-                            contentDescription = null,
-                            modifier = Modifier.size(75.dp)
-                        )
-                    }
+                   for (i in 1..5) {
+                       Box(
+                           contentAlignment = Alignment.Center,
+                           modifier = Modifier
+                               .size(60.dp)
+                               .then(
+                                   if (i == 5) Modifier.background(Color.Black)
+                                   else Modifier.background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                               )
+                       ) {
+                           AsyncImage(
+                               model = ImageRequest.Builder(LocalContext.current)
+                                   .data(listOfLastUnlocked[i-1])
+                                   .crossfade(true)
+                                   .build(),
+                               contentScale = ContentScale.Fit,
+                               contentDescription = null,
+                               modifier = Modifier.size(60.dp),
+                               alpha =
+                                   if (i == 5) 0.5f
+                                   else 1f
+                           )
 
-                    Text("oi")
+                           if (i == 5) {
+                               Text("+32")
+                           }
+                       }
+                   }
                 }
             }
         }
     }
+}
+
+@Composable
+fun allUnlockedAchievements (
+    onClickListener: () -> Unit,
+    unLocked: String,
+){
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClickListener() },
+        colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.onSecondary,
+            contentColor = Color.White,
+            disabledContainerColor = Color.Gray,
+            disabledContentColor = Color.Black
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_control),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(65.dp)
+                        .padding(start = 20.dp),
+                )
+
+                Column(
+                    modifier = Modifier
+                        .padding(start = 20.dp)
+                ){
+                    Text(
+                        text = "PLATINA",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 12.sp,
+                    )
+                    Text(
+                        text = "ALCANÇADA",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .height(90.dp)
+                    .width(150.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ){
+                Text(
+                    "CONQUISTAS",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                )
+                Text(
+                    unLocked,
+                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.surface,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun allUnlockedPreview(){
+    GameShelfTheme(
+        darkTheme = true,
+        content = {
+            allUnlockedAchievements(
+                onClickListener = {},
+                unLocked = "123"
+            )
+        }
+    )
 }
