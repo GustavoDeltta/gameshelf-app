@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -13,22 +14,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -43,13 +47,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.app.gameshelf.ui.components.backButton.backButton
+import com.app.gameshelf.ui.components.backButton.BackButton
 import com.app.gameshelf.R
-import com.app.gameshelf.ui.components.buttonAddTo.ButtonAddTo
-import com.app.gameshelf.ui.components.highLightAchievements.highLightAchievements
+import com.app.gameshelf.ui.components.buttonAddTo.buttonAddTo
+import com.app.gameshelf.ui.components.highLightAchievements.HighLightAchievements
 import com.app.gameshelf.ui.screens.gameDetails.GameDetailsViewModel
-import com.app.gameshelf.ui.screens.gameDetails.GameViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     gameId: String,
@@ -106,7 +110,7 @@ fun GameScreen(
                     )
             )
 
-            backButton(onBackClick = onBackClick)
+            BackButton(onBackClick = onBackClick)
 
             Column(
                 modifier = Modifier
@@ -176,7 +180,7 @@ fun GameScreen(
         ) {
             // Button backlog
             val Status: String = "completed"
-            ButtonAddTo(Status)
+            buttonAddTo(Status)
 
             // Developers and Publishers
             Row(
@@ -348,27 +352,33 @@ fun GameScreen(
             //  Achievements
             // --------------------------------
 
-            highLightAchievements(
-                onClickListener = {
-                    onGameDetailsClick(
-                        "conquistas",
-                        detailsState.gameData?.name ?: ""
-                    )
-                },
-                unLocked = "56",
-                locked = "56",
-                progress = 0.0f,
-                lastUnlockedImage = "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/2161700/6e7494b675cda9e4e49c4f69b6db861215297875.jpg",
-                lastUnlockedName = "Um Novo Laço",
-                lastUnlockedDescription = "Faça uma nova amizade e descubra um novo arcano",
-                listOfLastUnlocked = listOf(
-                    "https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/2161700/0e663e02f247d96c7831a475cb94207c915edef7.jpg",
-                    "https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/2161700/72dcd4e4707d8feb2fe31ebabeec7cf177dc1c8e.jpg",
-                    "https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/2161700/0e6f407133cc515e57f87beb86bd249f88c1465e.jpg",
-                    "https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/2161700/266b23707fa588742cab527fd146d48630a3548f.jpg",
-                    "https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/2161700/d449b1bd7151fa69e3d34e9b42bd3142a8cbb8a4.jpg",
+            if (detailsState.isLoading){
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.Gray.copy(alpha = 0.5f))
                 )
-            )
+            }
+
+            else {
+                HighLightAchievements(
+                    onClickListener = {
+                        onGameDetailsClick(
+                            "conquistas",
+                            detailsState.gameData?.name ?: ""
+                        )
+                    },
+                    gameID = gameId,
+                    unLocked = detailsState.gameData?.achievementsHighlights?.achieved ?: 0,
+                    locked = detailsState.gameData?.achievementsHighlights?.max ?: 0,
+                    progress = detailsState.gameData?.achievementsHighlights?.getProgressPercentage() ?: 0f,
+                    lastUnlockedImage = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.img ?: "",
+                    lastUnlockedName = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.name ?: "",
+                    lastUnlockedDescription = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.description ?: "",
+                    listOfLastUnlocked = detailsState.gameData?.achievementsHighlights?.lastFive ?: emptyList()
+                )
+            }
 
             // --------------------------------
             //  Rating
@@ -391,8 +401,70 @@ fun GameScreen(
 
                 HorizontalDivider(thickness = 2.dp)
             }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background( color = MaterialTheme.colorScheme.surface )
+                    .padding(bottom = 10.dp)
+                    .height(100.dp),
+            ) {
+                // codigo das notas
+            }
+
+            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
+
+            // --------------------------------
+            //  Images carousel
+            // --------------------------------
+
+            val screenshots = detailsState.gameData?.screenshots ?: emptyList()
+            if (screenshots.isEmpty()) return
+
+            val carouselState = rememberCarouselState { screenshots.size }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                if (detailsState.isLoading){
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(Color.Gray.copy(alpha = 0.5f))
+                    )
+                }
+
+                HorizontalMultiBrowseCarousel(
+                    state = carouselState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    preferredItemWidth = 300.dp,
+                    itemSpacing = 8.dp
+                ) { index ->
+                    val screenshot = screenshots[index]
+
+                    Card(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .maskClip(ShapeDefaults.Small),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    ) {
+                        AsyncImage(
+                            model = screenshot.pathThumbnail,
+                            contentDescription = "Screenshot ${index + 1}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+
+            }
+
+
         }
-
-
     }
 }

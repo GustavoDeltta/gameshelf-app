@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,7 +42,7 @@ import com.app.gameshelf.R
 import com.app.gameshelf.data.model.Achievement
 import com.app.gameshelf.ui.components.achievementCard.AchievementBottomSheet
 import com.app.gameshelf.ui.components.achievementCard.AchievementCard
-import com.app.gameshelf.ui.components.backButton.backButton
+import com.app.gameshelf.ui.components.backButton.BackButton
 
 
 @Composable
@@ -94,7 +95,7 @@ fun GameDetailsScreen(
             )
     )
 
-    backButton(onBackClick = onBackClick)
+    BackButton(onBackClick = onBackClick)
 
     Column(
         modifier = Modifier
@@ -107,7 +108,8 @@ fun GameDetailsScreen(
             name,
             style = MaterialTheme.typography.titleLarge,
             fontSize = 30.sp,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
         )
 
         Text(

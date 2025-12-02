@@ -15,10 +15,12 @@ interface ApiService {
         @Query("language") language: String = "brazilian"
     ): Response<ApiResponse>
 
+    // TODO: remover essas informações adicionais
     @GET("api/game/{gameId}")
     suspend fun getGameDetails(
         @Path("gameId") gameId: String,
-        @Query("language") language: String = "brazilian"
+        @Query("language") language: String = "brazilian",
+        @Query("steamid") steamAppId: String = "76561199157114802"
     ): Response<GameResponse>
 
 }

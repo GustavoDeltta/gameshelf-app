@@ -45,8 +45,13 @@ data class Achievement(
 
     @SerializedName("achieved")
     val achieved: Boolean,
+
+    @SerializedName("unlocktime")
+    val unlocktime: Int
 ) {
     fun playerPercentUnlockedToFloat(): Float {
         return playerPercentUnlocked.toFloat() / 100
     }
+
+
 }

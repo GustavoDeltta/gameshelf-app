@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.app.gameshelf.R
 
 @Composable
-fun ButtonAddTo(status: String) {
+fun buttonAddTo(status: String) {
     data class StatusData(
         val text: String,
         val color: Color,

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.app.gameshelf.R
 
 @Composable
-fun backButton (onBackClick: () -> Unit){
+fun BackButton (onBackClick: () -> Unit){
     IconButton(
         modifier = Modifier
             .padding(top = 20.dp, start = 16.dp)

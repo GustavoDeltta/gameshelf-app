@@ -44,6 +44,9 @@ data class GameDataApi(
     @SerializedName("dlcs")
     val dlcs: List<Int>,
 
+    @SerializedName("achievementHighlights")
+    val achievementsHighlights: AchievementsHighlights,
+
     @SerializedName("platforms")
     val platforms: Platforms,
 
@@ -79,6 +82,46 @@ data class Genre(
 
     @SerializedName("description")
     val description: String
+)
+
+data class AchievementsHighlights(
+    @SerializedName("achieved")
+    val achieved: Int,
+
+    @SerializedName("max")
+    val max: Int,
+
+    @SerializedName("progress")
+    val progress: Float,
+
+    @SerializedName("lastUnlocked")
+    val lastUnlocked: lastUnlocked,
+
+    @SerializedName("lastFive")
+    val lastFive: List<lastFive>
+) {
+    fun getProgressPercentage(): Float {
+        return progress / 100
+    }
+}
+
+data class lastUnlocked(
+    @SerializedName("img")
+    val img: String,
+
+    @SerializedName("name")
+    val name: String,
+
+    @SerializedName("desc")
+    val description: String,
+
+    @SerializedName("unlocktime")
+    val unlocktime: Int,
+)
+
+data class lastFive(
+    @SerializedName("img")
+    val img: String,
 )
 
 data class Platforms(

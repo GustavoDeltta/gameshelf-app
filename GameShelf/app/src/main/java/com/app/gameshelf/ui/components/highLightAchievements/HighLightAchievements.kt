@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,16 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -38,18 +33,19 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.app.gameshelf.R
-import com.app.gameshelf.ui.theme.GameShelfTheme
+import com.app.gameshelf.data.model.lastFive
 
 @Composable
-fun highLightAchievements (
+fun HighLightAchievements (
     onClickListener: () -> Unit,
-    unLocked: String,
-    locked: String,
+    gameID: String,
+    unLocked: Int,
+    locked: Int,
     progress: Float,
     lastUnlockedImage: String,
     lastUnlockedName: String,
     lastUnlockedDescription: String,
-    listOfLastUnlocked: List<String>
+    listOfLastUnlocked: List<lastFive>
 ){
 
     if (unLocked == locked) {
@@ -73,6 +69,7 @@ fun highLightAchievements (
         ),
         elevation = CardDefaults.cardElevation(0.dp),
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,7 +108,7 @@ fun highLightAchievements (
                             .size(60.dp)
                             .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                     ) {
-                        if (unLocked == 0.toString()){
+                        if (unLocked == 0){
                             Image(
                                 painter = androidx.compose.ui.res.painterResource(R.drawable.ph_without_achievements),
                                 contentDescription = null,
@@ -121,7 +118,7 @@ fun highLightAchievements (
                         else {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
-                                    .data(lastUnlockedImage)
+                                    .data("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameID}/${lastUnlockedImage}")
                                     .crossfade(true)
                                     .build(),
                                 contentScale = ContentScale.Fit,
@@ -139,7 +136,7 @@ fun highLightAchievements (
                     ) {
                         Text(
                             text=
-                                if(unLocked == 0.toString() ) "Nenhuma conquista desbloqueada"
+                                if(unLocked == 0 ) "Nenhuma conquista desbloqueada"
                                 else lastUnlockedName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -147,7 +144,7 @@ fun highLightAchievements (
                             fontWeight = FontWeight.Medium,
                         )
                         Text(
-                            text = if(unLocked == 0.toString() ) "Jogue e desbloquie conquistas."
+                            text = if(unLocked == 0 ) "Jogue e desbloquie conquistas."
                             else lastUnlockedDescription,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
@@ -178,7 +175,7 @@ fun highLightAchievements (
                        ) {
                            AsyncImage(
                                model = ImageRequest.Builder(LocalContext.current)
-                                   .data(listOfLastUnlocked[i-1])
+                                   .data("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameID}/${listOfLastUnlocked[i-1].img}")
                                    .crossfade(true)
                                    .build(),
                                contentScale = ContentScale.Fit,
@@ -203,7 +200,7 @@ fun highLightAchievements (
 @Composable
 fun allUnlockedAchievements (
     onClickListener: () -> Unit,
-    unLocked: String,
+    unLocked: Int,
 ){
     Card(
         modifier = Modifier
@@ -267,7 +264,7 @@ fun allUnlockedAchievements (
                     fontSize = 12.sp,
                 )
                 Text(
-                    unLocked,
+                    "${unLocked}",
                     fontSize = 16.sp,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.surface,
@@ -278,16 +275,3 @@ fun allUnlockedAchievements (
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun allUnlockedPreview(){
-    GameShelfTheme(
-        darkTheme = true,
-        content = {
-            allUnlockedAchievements(
-                onClickListener = {},
-                unLocked = "123"
-            )
-        }
-    )
-}
