@@ -1,5 +1,6 @@
 package com.app.gameshelf.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -49,7 +50,7 @@ val Typography = Typography(
     labelMedium = TextStyle(
         fontFamily = PoppinsFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 13.sp,
+        fontSize = 12.sp,
         lineHeight = 22.sp,
         letterSpacing = 0.25.sp
     ),
