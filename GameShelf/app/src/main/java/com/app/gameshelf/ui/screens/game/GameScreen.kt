@@ -1,11 +1,15 @@
 package com.app.gameshelf.ui.screens.game
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,9 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -36,12 +38,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,7 +67,7 @@ fun GameScreen(
     onGameDetailsClick: (String, String) -> Unit,
     detailsViewModel: GameDetailsViewModel = viewModel()
 ){
-    val detailsState by detailsViewModel.uiState.collectAsState()
+    val uiState by detailsViewModel.uiState.collectAsState()
     val scrollVertical = rememberScrollState()
 
     LaunchedEffect(gameId) {
@@ -85,7 +90,7 @@ fun GameScreen(
                     .fillMaxWidth()
                     .blur(2.dp)
                     .height(290.dp),
-                model = detailsState.gameData?.background,
+                model = "https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/header.jpg",
                 contentDescription = "Game Banner",
                 contentScale = ContentScale.Crop,
                 alignment = androidx.compose.ui.BiasAlignment(
@@ -129,7 +134,7 @@ fun GameScreen(
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         AsyncImage(
-                            model = detailsState.gameData?.cover,
+                            model = "https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/library_600x900.jpg",
                             contentDescription = "Game cover",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
@@ -142,27 +147,36 @@ fun GameScreen(
                             .padding(start = 16.dp),
                         verticalArrangement = Arrangement.Bottom
                     ) {
-                        Text(
-                            text = detailsState.gameData?.name ?: "",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        if(uiState.isLoading){
+                            SkeletonLoading(with = 0.5f, modifier = Modifier.padding(bottom = 5.dp))
+                            SkeletonLoading(with = 0.35f, height = 15.dp)
+                            Spacer(modifier = Modifier.height(10.dp))
+                            repeat(4){
+                                SkeletonLoading(height = 15.dp, modifier = Modifier.padding(bottom = 5.dp))
+                            }
+                        } else {
+                            Text(
+                                text = uiState.gameData?.name ?: "",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
 
-                        Text(
-                            "2024 - ATLUS",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
+                            Text(
+                                "2024 - ATLUS",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                        Text(
-                            text = detailsState.gameData?.description ?: "",
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                            textAlign = TextAlign.Justify,
-                        )
+                            Text(
+                                text = uiState.gameData?.description ?: "",
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Justify,
+                            )
+                        }
                     }
                 }
             }
@@ -179,8 +193,24 @@ fun GameScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Button backlog
-            val Status: String = "completed"
-            buttonAddTo(Status)
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .height(60.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ){
+                    SkeletonLoading(with = 0.5f)
+                }
+            } else {
+                buttonAddTo("null")
+            }
+
 
             // Developers and Publishers
             Row(
@@ -188,8 +218,8 @@ fun GameScreen(
                     .fillMaxWidth()
                     .padding(top = 10.dp)
                     .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = MaterialTheme.shapes.medium
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = MaterialTheme.shapes.medium
                     ),
                     horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -204,12 +234,16 @@ fun GameScreen(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
 
-                    Text(
-                        text = detailsState.gameData?.developers?.get(0) ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    if(uiState.isLoading){
+                        SkeletonLoading(with = 0.5f)
+                    }else {
+                        Text(
+                            text = uiState.gameData?.developers?.get(0) ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
 
                 Column(
@@ -223,13 +257,18 @@ fun GameScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
-                    Text(
-                        text = detailsState.gameData?.publishers?.get(0) ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.End
-                    )
+
+                    if(uiState.isLoading){
+                        SkeletonLoading(with = 0.8f)
+                    }else{
+                        Text(
+                            text = uiState.gameData?.publishers?.get(0) ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.End
+                        )
+                    }
                 }
             }
 
@@ -268,8 +307,8 @@ fun GameScreen(
 
             Row(
             modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
+                .fillMaxWidth()
+                .padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 infoList.forEach { info ->
@@ -279,7 +318,7 @@ fun GameScreen(
                             .clickable {
                                 onGameDetailsClick(
                                     info.category,
-                                    detailsState.gameData?.name ?: ""
+                                    uiState.gameData?.name ?: ""
                                 )
                             }
                             .background(
@@ -290,13 +329,17 @@ fun GameScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            info.quant,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 20.sp
-                        )
+                        if(uiState.isLoading){
+                            SkeletonLoading(with = 0.5f)
+                        } else {
+                            Text(
+                                info.quant,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 20.sp
+                            )
+                        }
 
                         Row(
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
@@ -322,8 +365,8 @@ fun GameScreen(
 
             Row(
                 modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 15.dp),
+                    .fillMaxWidth()
+                    .padding(vertical = 15.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -334,30 +377,37 @@ fun GameScreen(
                     fontWeight = FontWeight.Medium,
                 )
 
-                Text(
-                    "ver todas",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    modifier = Modifier.clickable {
-                        onGameDetailsClick(
-                            "conquistas",
-                            detailsState.gameData?.name ?: ""
-                        )
-                    }
-                )
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f)
+                } else {
+                    Text(
+                        "ver todas",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.clickable {
+                            onGameDetailsClick(
+                                "conquistas",
+                                uiState.gameData?.name ?: ""
+                            )
+                        }
+                    )
+                }
             }
 
             // --------------------------------
             //  Achievements
             // --------------------------------
 
-            if (detailsState.isLoading){
+            if (uiState.isLoading){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
-                        .background(Color.Gray.copy(alpha = 0.5f))
+                        .height(180.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            shape = MaterialTheme.shapes.small
+                        )
                 )
             }
 
@@ -366,17 +416,17 @@ fun GameScreen(
                     onClickListener = {
                         onGameDetailsClick(
                             "conquistas",
-                            detailsState.gameData?.name ?: ""
+                            uiState.gameData?.name ?: ""
                         )
                     },
                     gameID = gameId,
-                    unLocked = detailsState.gameData?.achievementsHighlights?.achieved ?: 0,
-                    locked = detailsState.gameData?.achievementsHighlights?.max ?: 0,
-                    progress = detailsState.gameData?.achievementsHighlights?.getProgressPercentage() ?: 0f,
-                    lastUnlockedImage = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.img ?: "",
-                    lastUnlockedName = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.name ?: "",
-                    lastUnlockedDescription = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.description ?: "",
-                    listOfLastUnlocked = detailsState.gameData?.achievementsHighlights?.lastFive ?: emptyList()
+                    unLocked = uiState.gameData?.achievementsHighlights?.achieved ?: 0,
+                    locked = uiState.gameData?.achievementsHighlights?.max ?: 0,
+                    progress = uiState.gameData?.achievementsHighlights?.getProgressPercentage() ?: 0f,
+                    lastUnlockedImage = uiState.gameData?.achievementsHighlights?.lastUnlocked?.img ?: "",
+                    lastUnlockedName = uiState.gameData?.achievementsHighlights?.lastUnlocked?.name ?: "",
+                    lastUnlockedDescription = uiState.gameData?.achievementsHighlights?.lastUnlocked?.description ?: "",
+                    listOfLastUnlocked = uiState.gameData?.achievementsHighlights?.lastFive ?: emptyList()
                 )
             }
 
@@ -405,7 +455,7 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background( color = MaterialTheme.colorScheme.surface )
+                    .background(color = MaterialTheme.colorScheme.surface)
                     .padding(bottom = 10.dp)
                     .height(100.dp),
             ) {
@@ -418,7 +468,7 @@ fun GameScreen(
             //  Images carousel
             // --------------------------------
 
-            val screenshots = detailsState.gameData?.screenshots ?: emptyList()
+            val screenshots = uiState.gameData?.screenshots ?: emptyList()
             if (screenshots.isEmpty()) return
 
             val carouselState = rememberCarouselState { screenshots.size }
@@ -427,7 +477,7 @@ fun GameScreen(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                if (detailsState.isLoading){
+                if (uiState.isLoading){
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -460,11 +510,49 @@ fun GameScreen(
                         )
                     }
                 }
-
-
             }
 
 
         }
     }
+}
+
+@Composable
+fun SkeletonLoading(
+    modifier: Modifier = Modifier,
+    with: Float = 1f,
+    height: Dp = 25.dp
+){
+    val infiniteTransition = rememberInfiniteTransition()
+    val localConfig = LocalConfiguration.current
+    val target = (localConfig.screenWidthDp * 3).toFloat()
+
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = target,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1000),
+                repeatMode = RepeatMode.Restart,
+            ), label = "shimmer"
+    )
+
+    val skeletonColor = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = 0f),
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            MaterialTheme.colorScheme.primary.copy(alpha = 0f)
+        ),
+        end = Offset(x = scale, y = 0f)
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth(with)
+            .background(
+                skeletonColor,
+                shape = MaterialTheme.shapes.small
+            )
+            .height(height)
+    )
 }

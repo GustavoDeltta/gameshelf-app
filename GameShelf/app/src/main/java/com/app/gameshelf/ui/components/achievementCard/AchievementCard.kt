@@ -89,25 +89,14 @@ fun AchievementCard(
                     )
                 }
 
-                // Icon (lock / hidden)
-                val iconId =
-                    when {
-                        hidden && !unlocked -> R.drawable.ic_quest
-                        !hidden && !unlocked -> R.drawable.ic_lock
-                        else -> R.drawable.ic_lock
-                    }
-
-                val iconTint =
-                    when {
-                        hidden && !unlocked -> MaterialTheme.colorScheme.primary
-                        !unlocked -> Color.White.copy(alpha = 0.9f)
-                        else -> Color.Transparent
-                    }
-
                 Icon(
-                    painter = painterResource(iconId),
+                    painter =
+                        if(hidden == true && unlocked == false )painterResource(id = R.drawable.ic_quest)
+                        else painterResource(id = R.drawable.ic_lock),
                     contentDescription = null,
-                    tint = iconTint,
+                    tint =
+                        if(hidden == true && unlocked == false ) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        else Color.Transparent,
                     modifier = Modifier.size(30.dp)
                 )
             }
