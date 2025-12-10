@@ -48,7 +48,7 @@ fun HighLightAchievements (
     listOfLastUnlocked: List<lastFive>
 ){
 
-    if (unLocked == locked) {
+    if (unLocked == locked && locked > 0) {
         return allUnlockedAchievements(
             onClickListener = onClickListener,
             unLocked = unLocked
@@ -108,7 +108,7 @@ fun HighLightAchievements (
                             .size(60.dp)
                             .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                     ) {
-                        if (unLocked == 0){
+                        if (unLocked == 0 || locked == 0){
                             Image(
                                 painter = androidx.compose.ui.res.painterResource(R.drawable.ph_without_achievements),
                                 contentDescription = null,
@@ -136,7 +136,8 @@ fun HighLightAchievements (
                     ) {
                         Text(
                             text=
-                                if(unLocked == 0 ) "Nenhuma conquista desbloqueada"
+                                if(unLocked == 0 && locked > 0) "Nenhuma conquista desbloqueada"
+                                else if (locked == 0) "Sem Conquistas"
                                 else lastUnlockedName,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -144,8 +145,10 @@ fun HighLightAchievements (
                             fontWeight = FontWeight.Medium,
                         )
                         Text(
-                            text = if(unLocked == 0 ) "Jogue e desbloquie conquistas."
-                            else lastUnlockedDescription,
+                            text =
+                                if(unLocked == 0 && locked > 0 ) "Jogue e desbloquie conquistas."
+                                else if (locked == 0) "Esse jogo não possui conquistas"
+                                else lastUnlockedDescription,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                             fontSize = 12.sp,
@@ -157,40 +160,46 @@ fun HighLightAchievements (
                 }
 
                 // Last Added Achievement
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 15.dp, bottom = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                   for (i in 1..5) {
-                       Box(
-                           contentAlignment = Alignment.Center,
-                           modifier = Modifier
-                               .size(60.dp)
-                               .then(
-                                   if (i == 5) Modifier.background(Color.Black)
-                                   else Modifier.background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                               )
-                       ) {
-                           AsyncImage(
-                               model = ImageRequest.Builder(LocalContext.current)
-                                   .data("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameID}/${listOfLastUnlocked[i-1].img}")
-                                   .crossfade(true)
-                                   .build(),
-                               contentScale = ContentScale.Fit,
-                               contentDescription = null,
-                               modifier = Modifier.size(60.dp),
-                               alpha =
-                                   if (i == 5) 0.5f
-                                   else 1f
-                           )
+                if (locked > 0) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 15.dp, bottom = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        for (i in 1..5) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .then(
+                                        if (i == 5) Modifier.background(Color.Black)
+                                        else Modifier.background(
+                                            color = MaterialTheme.colorScheme.primary.copy(
+                                                alpha = 0.1f
+                                            )
+                                        )
+                                    )
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${gameID}/${listOfLastUnlocked[i - 1].img}")
+                                        .crossfade(true)
+                                        .build(),
+                                    contentScale = ContentScale.Fit,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(60.dp),
+                                    alpha =
+                                        if (i == 5) 0.5f
+                                        else 1f
+                                )
 
-                           if (i == 5) {
-                               Text("+32")
-                           }
-                       }
-                   }
+                                if (i == 5) {
+                                    Text("+32")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

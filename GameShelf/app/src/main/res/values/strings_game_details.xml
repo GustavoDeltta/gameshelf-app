@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Achievements unlocked -->
+    <string name="achievementsUnlocked">Achievements unlocked</string>
+    <string name="achievementsLocked">Achievements locked</string>
+
+
+</resources>

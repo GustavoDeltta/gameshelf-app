@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -70,11 +71,16 @@ private fun NavBarItem(
             painter = when (route) {
                 "home" -> painterResource(R.drawable.ic_home)
                 "search" -> painterResource(R.drawable.ic_search)
-                "news" -> painterResource(R.drawable.ic_news)
                 "profile" -> painterResource(R.drawable.ic_profile)
                 else -> painterResource(R.drawable.ic_home)
             },
-            contentDescription = route,
+            contentDescription =when (route) {
+                "home" -> stringResource(R.string.home)
+                "search" -> stringResource(R.string.search)
+                "news" -> "Novidades"
+                "profile" -> stringResource(R.string.profile)
+                else -> stringResource(R.string.home)
+            },
             tint = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary
         )
 
@@ -85,11 +91,11 @@ private fun NavBarItem(
         ) {
             Text(
                 text = when (route) {
-                    "home" -> "Inicio"
-                    "search" -> "Procurar"
+                    "home" -> stringResource(R.string.home)
+                    "search" -> stringResource(R.string.search)
                     "news" -> "Novidades"
-                    "profile" -> "Conta"
-                    else -> "Inicio"
+                    "profile" -> stringResource(R.string.profile)
+                    else -> stringResource(R.string.home)
                 },
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.surface,

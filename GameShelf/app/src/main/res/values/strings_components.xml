@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Achievements Card -->
+    <string name="hiddenAchievement">Hidden achievement</string>
+    <string name="hiddenAchievementDescription">Hidden details, click to display achievement spoiler</string>
+    <string name="globalPercentage">Global percentage of players:</string>
+
+    <!-- BackLog buttton -->
+    <string name="addTo">Add to</string>
+    <string name="playing">Playing</string>
+    <string name="completed">Completed</string>
+    <string name="backlog">List</string>
+
+</resources>

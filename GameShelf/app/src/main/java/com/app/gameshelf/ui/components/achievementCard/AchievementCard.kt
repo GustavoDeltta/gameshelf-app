@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -105,7 +106,9 @@ fun AchievementCard(
                 modifier = Modifier.padding(start = 20.dp, end = 10.dp)
             ) {
                 Text(
-                    text = if (!hidden || unlocked) achievement.name else "Conquista Oculta",
+                    text =
+                        if (!hidden || unlocked) achievement.name
+                        else stringResource(R.string.hiddenAchievement),
                     style = MaterialTheme.typography.titleMedium,
                     color =
                         if (!unlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
@@ -115,10 +118,9 @@ fun AchievementCard(
                 )
 
                 Text(
-                    text = if (!hidden || unlocked)
-                        achievement.description
-                    else
-                        "Detalhes ocultos, clique para exibir spoiler da conquista",
+                    text =
+                        if (!hidden || unlocked) achievement.description
+                        else stringResource(R.string.hiddenAchievementDescription),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.labelMedium,

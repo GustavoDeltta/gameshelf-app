@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,7 +62,7 @@ fun GameDetailsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(gameId, category) {
-        if (category == "conquistas") {
+        if (category == "achievements") {
             viewModel.loadAchievements(gameId, playerId)
         }
     }
@@ -113,7 +114,13 @@ fun GameDetailsScreen(
         )
 
         Text(
-            category,
+            text = when(category){
+                "achievements" -> stringResource(R.string.achievements)
+                stringResource(R.string.list) -> stringResource(R.string.list)
+                stringResource(R.string.reviews) -> stringResource(R.string.reviews)
+                stringResource(R.string.players) -> stringResource(R.string.players)
+                else -> ""
+            },
             style = MaterialTheme.typography.titleLarge,
             fontSize = 20.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
@@ -139,7 +146,7 @@ fun GameDetailsScreen(
                 .padding(top = 70.dp),
         ) {
             when (category) {
-                "conquistas" -> {
+                "achievements" -> {
                     // Show loading
                     if (uiState.isLoading) {
                         item {
@@ -184,7 +191,7 @@ fun GameDetailsScreen(
                                     )
                                 ) {
                                     Text(
-                                        "${uiState.unlockedAchievements.size} Conquistas desbloqueadas",
+                                        "${uiState.unlockedAchievements.size} " + stringResource(R.string.achievementsUnlocked),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(end = 15.dp)
@@ -240,7 +247,7 @@ fun GameDetailsScreen(
                                     )
                                 ) {
                                     Text(
-                                        "${uiState.lockedAchievements.size} Conquistas bloqueadas",
+                                        "${uiState.lockedAchievements.size} " + stringResource(R.string.achievementsLocked),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(end = 15.dp)

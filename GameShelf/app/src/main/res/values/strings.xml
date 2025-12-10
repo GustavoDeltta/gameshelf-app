@@ -1,3 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Game Shelf</string>
+    <string name="app_name">GameShelf</string>
+    <string name="languageApi">english</string>
+
+    <!-- NavBar -->
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="profile">Profile</string>
+
+    <!-- Theme -->
+    <string name="theme">Theme</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="choose_theme">Choose Theme</string>
+
+    <!-- Language -->
+    <string name="language">Language</string>
+    <string name="choose_language">Choose Language</string>
+
+    <!-- General -->
+    <string name="cancel">Cancel</string>
 </resources>

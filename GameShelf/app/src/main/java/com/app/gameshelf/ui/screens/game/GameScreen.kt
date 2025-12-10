@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -135,7 +136,7 @@ fun GameScreen(
                     ) {
                         AsyncImage(
                             model = "https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/library_600x900.jpg",
-                            contentDescription = "Game cover",
+                            contentDescription = stringResource(R.string.game_cover),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                         )
@@ -182,9 +183,7 @@ fun GameScreen(
             }
         }
 
-        // --------------------------------
-        //  Statistics of list, Players and Rating
-        // --------------------------------
+        //  Statistics of list, Players and Rating ---------------------------------
 
         Column(
             Modifier
@@ -208,7 +207,7 @@ fun GameScreen(
                     SkeletonLoading(with = 0.5f)
                 }
             } else {
-                buttonAddTo("null")
+                buttonAddTo("completed")
             }
 
 
@@ -229,7 +228,7 @@ fun GameScreen(
                         .weight(0.5f)
                 ) {
                     Text(
-                        "Desenvolvedora",
+                        stringResource(R.string.developers),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
@@ -253,7 +252,7 @@ fun GameScreen(
                     horizontalAlignment = androidx.compose.ui.Alignment.End
                 ) {
                     Text(
-                        "Distribuidora",
+                        stringResource(R.string.publishers),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
@@ -284,22 +283,22 @@ fun GameScreen(
             val infoList = listOf(
                 InfoItem(
                     quant = "1.2k",
-                    category = "Lista",
-                    Description = "Jogos que estão na sua lista",
+                    category = stringResource(R.string.list),
+                    Description = stringResource(R.string.listDescription),
                     iconRes = R.drawable.ic_list,
                     color = MaterialTheme.colorScheme.secondary
                 ),
                 InfoItem(
                     quant = "1.9k",
-                    category = "Avaliações",
-                    Description = "Avaliações de jogos",
+                    category = stringResource(R.string.reviews),
+                    Description = stringResource(R.string.reviewsDescription),
                     iconRes = R.drawable.ic_reviews,
                     color = MaterialTheme.colorScheme.onPrimary
                 ),
                 InfoItem(
                     quant = "26k",
-                    category = "Jogadores",
-                    Description = "Jogadores que jogaram",
+                    category = stringResource(R.string.players),
+                    Description = stringResource(R.string.playersDescription),
                     iconRes = R.drawable.ic_control,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -371,7 +370,7 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Conquistas",
+                    stringResource(R.string.achievements),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
@@ -381,13 +380,18 @@ fun GameScreen(
                     SkeletonLoading(with = 0.5f)
                 } else {
                     Text(
-                        "ver todas",
+                        text =
+                            if (uiState.gameData?.achievementsHighlights?.max == 0) ""
+                            else stringResource(R.string.seeAll),
                         style = MaterialTheme.typography.labelMedium,
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                         modifier = Modifier.clickable {
+                            if (uiState.gameData?.achievementsHighlights?.max == 0)
+                                return@clickable
+
                             onGameDetailsClick(
-                                "conquistas",
+                                "achievements",
                                 uiState.gameData?.name ?: ""
                             )
                         }
@@ -395,9 +399,7 @@ fun GameScreen(
                 }
             }
 
-            // --------------------------------
-            //  Achievements
-            // --------------------------------
+            //  Achievements --------------------------------
 
             if (uiState.isLoading){
                 Box(
@@ -414,8 +416,11 @@ fun GameScreen(
             else {
                 HighLightAchievements(
                     onClickListener = {
+                        if (uiState.gameData?.achievementsHighlights?.max == 0)
+                            return@HighLightAchievements
+
                         onGameDetailsClick(
-                            "conquistas",
+                            "achievements",
                             uiState.gameData?.name ?: ""
                         )
                     },

@@ -1,8 +1,9 @@
 package com.app.gameshelf.ui.screens.gameDetails
 
-import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.gameshelf.R
 import com.app.gameshelf.data.model.GameDataApi
 import com.app.gameshelf.data.repository.GameRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,9 +18,9 @@ data class GameDetailsUiState(
     val error: String? = null
 )
 
-class GameDetailsViewModel : ViewModel() {
+class GameDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = GameRepository()
+    private val repository = GameRepository(application.applicationContext)
 
     private val _uiState = MutableStateFlow(GameDetailsUiState())
     val uiState: StateFlow<GameDetailsUiState> = _uiState.asStateFlow()
@@ -41,7 +42,7 @@ class GameDetailsViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = exception.message ?: "Erro ao carregar detalhes do jogo"
+                        error = exception.message ?: "Error unknown"
                     )
                 }
             }

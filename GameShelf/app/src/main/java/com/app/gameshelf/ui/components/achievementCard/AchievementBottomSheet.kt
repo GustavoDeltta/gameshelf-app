@@ -21,9 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.R
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.app.gameshelf.data.model.Achievement
@@ -92,7 +94,7 @@ fun AchievementBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    "Porcentagem global dos jogadores:",
+                    stringResource(com.app.gameshelf.R.string.globalPercentage),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 )

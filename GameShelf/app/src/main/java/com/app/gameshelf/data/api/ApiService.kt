@@ -1,5 +1,6 @@
 package com.app.gameshelf.data.api
 
+import androidx.compose.ui.res.stringResource
 import com.app.gameshelf.data.model.ApiResponse
 import com.app.gameshelf.data.model.GameResponse
 import retrofit2.Response
@@ -12,14 +13,14 @@ interface ApiService {
     suspend fun getAchievements(
         @Path("gameId") gameId: String,
         @Path("playerId") playerId: String,
-        @Query("language") language: String = "brazilian"
+        @Query("language") language: String
     ): Response<ApiResponse>
 
     // TODO: remover essas informações adicionais
     @GET("api/game/{gameId}")
     suspend fun getGameDetails(
         @Path("gameId") gameId: String,
-        @Query("language") language: String = "brazilian",
+        @Query("language") language: String,
         @Query("steamid") steamAppId: String = "76561199157114802"
     ): Response<GameResponse>
 

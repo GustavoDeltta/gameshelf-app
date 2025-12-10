@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Achievements Card -->
+    <string name="hiddenAchievement">Conquista ocultada</string>
+    <string name="hiddenAchievementDescription">Detalhes ocultos, clique para exibir spoiler da conquista</string>
+    <string name="globalPercentage">Porcentagem global dos jogadores:</string>
+
+    <!-- BackLog buttton -->
+    <string name="addTo">Adicionar à</string>
+    <string name="playing">Jogando</string>
+    <string name="completed">Zerado</string>
+    <string name="backlog">Lista</string>
+
+
+</resources>
