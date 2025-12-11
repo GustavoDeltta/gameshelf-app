@@ -57,7 +57,19 @@ data class GameDataApi(
     val steamRatings: SteamRatings,
 
     @SerializedName("languages")
-    val languages: String
+    val languages: String,
+
+    @SerializedName("userGameLog")
+    val userGameLog: String,
+
+    @SerializedName("playingCount")
+    val playingCount: Int,
+
+    @SerializedName("reviewsCount")
+    val reviewsCount: Int,
+
+    @SerializedName("gameListsCount")
+    val gameListsCount: Int
 )
 
 data class ReleaseDate(

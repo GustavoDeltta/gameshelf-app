@@ -12,5 +12,12 @@
     <string name="completed">Zerado</string>
     <string name="backlog">Lista</string>
 
+    <!-- HighLight Achievements -->
+    <string name="noAchievementsUnlocked">Nenhuma conquista desbloqueada</string>
+    <string name="withoutAchievements">Sem conquistas</string>
+    <string name="noAchievementsUnlockedDescription">Jogue e desbloquie conquistas</string>
+    <string name="withoutAchievementsDescription">Esse jogo não possui conquistas</string>
 
+    <string name="platinum">PLATINA</string>
+    <string name="achieved">ALCANÇADA</string>
 </resources>

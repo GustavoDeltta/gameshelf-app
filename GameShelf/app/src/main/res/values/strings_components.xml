@@ -12,4 +12,13 @@
     <string name="completed">Completed</string>
     <string name="backlog">List</string>
 
+    <!-- HighLight Achievements -->
+    <string name="noAchievementsUnlocked">No achievements unlocked</string>
+    <string name="withoutAchievements">Without achievements</string>
+    <string name="noAchievementsUnlockedDescription">Play this game and unlock achievements</string>
+    <string name="withoutAchievementsDescription">This game has no achievements</string>
+
+    <string name="platinum">PLATINUM</string>
+    <string name="achieved">ACHIEVED</string>
+
 </resources>

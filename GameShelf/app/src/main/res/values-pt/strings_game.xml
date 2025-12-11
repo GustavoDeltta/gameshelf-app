@@ -21,6 +21,11 @@
     <string name="achievements">Conquistas</string>
     <string name="seeAll">ver todas</string>
 
+    <!-- Rating -->
+    <string name="steamReview">Avaliações: </string>
+    <string name="steamPositive">Positivas: </string>
+    <string name="steamNegative">Negativas: </string>
+
 
 
 </resources>

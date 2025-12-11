@@ -21,4 +21,9 @@
     <string name="achievements">Achievements</string>
     <string name="seeAll">see all</string>
 
+    <!-- Rating -->
+    <string name="steamReview">Reviews: </string>
+    <string name="steamPositive">Positives: </string>
+    <string name="steamNegative">Negatives: </string>
+
 </resources>
