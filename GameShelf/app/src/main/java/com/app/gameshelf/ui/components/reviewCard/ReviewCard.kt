@@ -204,13 +204,11 @@ fun ReviewCardWithoutCover(
                     fontSize = 13.sp,
                 )
             }
-
             Text(
                 text = reviewComent,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
-                maxLines = 3,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 16.dp)
             )

@@ -15,9 +15,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.app.gameshelf.R
+import com.app.gameshelf.ui.components.logBottomSheet.logBottomSheet
 
 @Composable
-fun buttonAddTo(status: String) {
+fun buttonAddTo(
+    status: String,
+    onClick: () -> Unit
+) {
     data class StatusData(
         val text: String,
         val color: Color,
@@ -25,15 +29,17 @@ fun buttonAddTo(status: String) {
         val textColor: Color
     )
 
-    val statusData = when (status) {
+    // Normaliza o status para minúsculas para facilitar a comparação
+    val statusData = when (status.lowercase()) {
         "backlog" -> StatusData(stringResource(R.string.list), MaterialTheme.colorScheme.tertiary, R.drawable.ic_list, MaterialTheme.colorScheme.surface)
         "playing" -> StatusData(stringResource(R.string.playing), MaterialTheme.colorScheme.onPrimary, R.drawable.ic_control, MaterialTheme.colorScheme.primary)
-        "completed" -> StatusData(stringResource(R.string.completed), MaterialTheme.colorScheme.onSecondary, R.drawable.ic_reviews, MaterialTheme.colorScheme.primary)
+        "finished", "completed" -> StatusData(stringResource(R.string.completed), MaterialTheme.colorScheme.onSecondary, R.drawable.ic_reviews, MaterialTheme.colorScheme.primary)
+        "dropped" -> StatusData("Dropped", MaterialTheme.colorScheme.secondary, R.drawable.ic_dropped, MaterialTheme.colorScheme.surface)
         else -> StatusData(stringResource(R.string.addTo), MaterialTheme.colorScheme.primary, R.drawable.ic_add, MaterialTheme.colorScheme.surface)
     }
 
     Button(
-        onClick = {},
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = statusData.color,
         ),
@@ -48,13 +54,13 @@ fun buttonAddTo(status: String) {
     ) {
         Icon(
             painter = androidx.compose.ui.res.painterResource(statusData.icon),
-            contentDescription = "${statusData.text}",
+            contentDescription = statusData.text,
             tint = statusData.textColor,
             modifier = Modifier.padding(end = 8.dp),
         )
 
         Text(
-            "${statusData.text}",
+            statusData.text,
             style = MaterialTheme.typography.titleMedium,
             color = statusData.textColor
         )

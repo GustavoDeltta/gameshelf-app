@@ -72,6 +72,8 @@ import com.app.gameshelf.ui.components.buttonAddTo.buttonAddTo
 import com.app.gameshelf.ui.components.highLightAchievements.HighLightAchievements
 import com.app.gameshelf.ui.components.ratingCard.RatingCard
 import com.app.gameshelf.ui.components.reviewCard.ReviewCardWithoutCover
+import com.app.gameshelf.ui.components.logBottomSheet.logBottomSheet
+import com.app.gameshelf.ui.components.reviewBottomSheet.ReviewBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,6 +90,8 @@ fun GameScreen(
     val context = LocalContext.current
     val authRepository = remember { AuthRepository(context) }
     val steamId = remember { authRepository.getSteamId() ?: "" }
+    var showLogSheet by remember { mutableStateOf(false) }
+    var showReviewSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(gameId) {
         detailsViewModel.loadGameDetails(gameId, steamId)
@@ -225,7 +229,10 @@ fun GameScreen(
                     SkeletonLoading(with = 0.5f)
                 }
             } else {
-                buttonAddTo("completed")
+                buttonAddTo(
+                    status = uiState.gameData?.userGameLog?.status ?: "",
+                    onClick = { showLogSheet = true }
+                )
             }
 
 
@@ -597,7 +604,9 @@ fun GameScreen(
             val reviews = uiState.gameData?.reviews ?: emptyList()
             
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 reviews.forEach { review ->
@@ -613,6 +622,30 @@ fun GameScreen(
                 }
             }
         }
+    }
+    
+    if (showLogSheet) {
+        logBottomSheet(
+            steamId = steamId,
+            gameID = gameId,
+            onDismiss = { showLogSheet = false },
+            onStatusUpdate = { newStatus ->
+                detailsViewModel.updateLocalLogStatus(newStatus)
+                showLogSheet = false
+            },
+            onReviewClick = {
+                showLogSheet = false
+                showReviewSheet = true
+            }
+        )
+    }
+
+    if (showReviewSheet) {
+        ReviewBottomSheet(
+            gameId = gameId,
+            gameName = uiState.gameData?.name ?: "",
+            onDismiss = { showReviewSheet = false }
+        )
     }
 }
 

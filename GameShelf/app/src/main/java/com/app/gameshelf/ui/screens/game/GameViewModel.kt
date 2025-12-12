@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.gameshelf.data.model.GameDataApi
+import com.app.gameshelf.data.model.UserGameLog
 import com.app.gameshelf.data.repository.GameRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +27,11 @@ class GameDetailsViewModel(application: Application) : AndroidViewModel(applicat
 
     fun loadGameDetails(gameId: String, steamId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            // Only show full loading skeleton if we don't have data yet.
+            // This prevents the screen from flashing skeletons when updating the status.
+            if (_uiState.value.gameData == null) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            }
 
             val result = repository.getGameDetails(gameId, steamId)
 
@@ -45,6 +50,16 @@ class GameDetailsViewModel(application: Application) : AndroidViewModel(applicat
                     )
                 }
             }
+        }
+    }
+
+    fun updateLocalLogStatus(status: String) {
+        val currentGameData = _uiState.value.gameData ?: return
+        val updatedLog = UserGameLog(status = status)
+        val updatedGameData = currentGameData.copy(userGameLog = updatedLog)
+
+        _uiState.update {
+            it.copy(gameData = updatedGameData)
         }
     }
 }

@@ -2,12 +2,15 @@ package com.app.gameshelf.data.api
 
 import androidx.compose.ui.res.stringResource
 import com.app.gameshelf.data.model.ApiResponse
+import com.app.gameshelf.data.model.GameLogRequest
+import com.app.gameshelf.data.model.GameLogResponse
 import com.app.gameshelf.data.model.GameResponse
 import com.app.gameshelf.data.model.GameReviewsResponse
 import com.app.gameshelf.data.model.LinkSteamRequest
 import com.app.gameshelf.data.model.LinkSteamResponse
 import com.app.gameshelf.data.model.LoginRequest
 import com.app.gameshelf.data.model.LoginResponse
+import com.app.gameshelf.data.model.ReviewRequest
 import com.app.gameshelf.data.model.SignupRequest
 import com.app.gameshelf.data.model.SignupResponse
 import retrofit2.Response
@@ -30,6 +33,19 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: LinkSteamRequest
     ): Response<LinkSteamResponse>
+
+    @POST("api/gamelog")
+    suspend fun createGameLog(
+        @Header("Authorization") token: String,
+        @Body request: GameLogRequest
+    ): Response<GameLogResponse>
+
+    @POST("api/reviews/{gameId}")
+    suspend fun createReview(
+        @Header("Authorization") token: String,
+        @Path("gameId") gameId: String,
+        @Body request: ReviewRequest
+    ): Response<Unit>
 
     @GET("api/game/{gameId}/achievements/{playerId}")
     suspend fun getAchievements(

@@ -2,11 +2,22 @@ package com.app.gameshelf.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 
 class PreferencesManager(context: Context) {
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    private val authPrefs = EncryptedSharedPreferences.create(
+        "auth_prefs",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
 
     companion object {
         private const val PREFS_NAME = "gameshelf_preferences"
@@ -46,5 +57,11 @@ class PreferencesManager(context: Context) {
             "en" -> "english"
             else -> "english"
         }
+    }
+
+    // Auth Token -----------------------
+
+    fun getAuthToken(): String? {
+        return authPrefs.getString("jwt_token", null)
     }
 }

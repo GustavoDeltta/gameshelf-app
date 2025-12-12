@@ -1,6 +1,10 @@
 package com.app.gameshelf.data.model
 
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
+import java.lang.reflect.Type
 
 data class GameResponse(
     @SerializedName("success")
@@ -66,7 +70,7 @@ data class GameDataApi(
     val languages: String,
 
     @SerializedName("userGameLog")
-    val userGameLog: String?,
+    val userGameLog: UserGameLog?, // Mudado de String? para UserGameLog?
 
     @SerializedName("playingCount")
     val playingCount: Int,
@@ -77,6 +81,33 @@ data class GameDataApi(
     @SerializedName("gameListsCount")
     val gameListsCount: Int
 )
+
+// Novo modelo para representar o objeto retornado quando há log
+data class UserGameLog(
+    @SerializedName("status")
+    val status: String
+    // Adicione outros campos se necessário (userId, gameId, createdAt etc)
+)
+
+// Deserializer customizado para lidar com String ou Object no campo userGameLog
+class UserGameLogDeserializer : JsonDeserializer<UserGameLog?> {
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): UserGameLog? {
+        return if (json.isJsonObject) {
+            // Se for um objeto, tenta deserializar normalmente
+            context.deserialize<UserGameLog>(json, UserGameLog::class.java)
+        } else if (json.isJsonPrimitive && json.asJsonPrimitive.isString) {
+            // Se for uma string (caso antigo ou inconsistência), cria um UserGameLog com status igual à string
+            UserGameLog(status = json.asString)
+        } else {
+            null
+        }
+    }
+}
+
 
 data class ReleaseDate(
     @SerializedName("coming_soon")
