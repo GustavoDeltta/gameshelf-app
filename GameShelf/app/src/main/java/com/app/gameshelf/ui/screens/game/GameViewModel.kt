@@ -1,9 +1,8 @@
-package com.app.gameshelf.ui.screens.gameDetails
+package com.app.gameshelf.ui.screens.game
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.gameshelf.R
 import com.app.gameshelf.data.model.GameDataApi
 import com.app.gameshelf.data.repository.GameRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,11 +24,11 @@ class GameDetailsViewModel(application: Application) : AndroidViewModel(applicat
     private val _uiState = MutableStateFlow(GameDetailsUiState())
     val uiState: StateFlow<GameDetailsUiState> = _uiState.asStateFlow()
 
-    fun loadGameDetails(gameId: String) {
+    fun loadGameDetails(gameId: String, steamId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val result = repository.getGameDetails(gameId)
+            val result = repository.getGameDetails(gameId, steamId)
 
             result.onSuccess { gameData ->
                 _uiState.update {

@@ -56,11 +56,17 @@ data class GameDataApi(
     @SerializedName("steamRatings")
     val steamRatings: SteamRatings,
 
+    @SerializedName("gameRatings")
+    val gameRatings: GameRatings,
+
+    @SerializedName("reviews")
+    val reviews: List<GameReview>,
+
     @SerializedName("languages")
     val languages: String,
 
     @SerializedName("userGameLog")
-    val userGameLog: String,
+    val userGameLog: String?,
 
     @SerializedName("playingCount")
     val playingCount: Int,
@@ -107,10 +113,10 @@ data class AchievementsHighlights(
     val progress: Float,
 
     @SerializedName("lastUnlocked")
-    val lastUnlocked: lastUnlocked,
+    val lastUnlocked: lastUnlocked?,
 
     @SerializedName("lastFive")
-    val lastFive: List<lastFive>
+    val lastFive: List<lastFive>?
 ) {
     fun getProgressPercentage(): Float {
         return progress / 100
@@ -183,3 +189,48 @@ data class SteamRatings(
         }
     }
 }
+
+data class GameRatings(
+    @SerializedName("total")
+    val total: Int,
+
+    @SerializedName("average")
+    val average: Float,
+
+    @SerializedName("ratings")
+    val ratings: Ratings
+)
+
+data class Ratings(
+    @SerializedName("1")
+    val star1: Int,
+
+    @SerializedName("2")
+    val star2: Int,
+
+    @SerializedName("3")
+    val star3: Int,
+
+    @SerializedName("4")
+    val star4: Int,
+
+    @SerializedName("5")
+    val star5: Int
+)
+
+data class GameReview(
+    @SerializedName("appid") val appId: String,
+    @SerializedName("gameName") val gameName: String,
+    @SerializedName("profilePicture") val profilePicture: String,
+    @SerializedName("profileName") val profileName: String,
+    @SerializedName("log") val log: String?,
+    @SerializedName("hoursPlayed") val hoursPlayed: String,
+    @SerializedName("reviewScore") val reviewScore: Int,
+    @SerializedName("reviewComment") val reviewComment: String,
+    @SerializedName("reviewDate") val reviewDate: String,
+    @SerializedName("liked") val liked: Boolean
+)
+
+data class GameReviewsResponse(
+    val reviews: List<GameReview>
+)

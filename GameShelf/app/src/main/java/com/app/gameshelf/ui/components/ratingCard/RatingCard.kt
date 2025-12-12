@@ -26,8 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.gameshelf.R
-import com.app.gameshelf.ui.screens.game.SkeletonLoading
-import com.app.gameshelf.ui.screens.gameDetails.GameDetailsUiState
 
 @Composable
 fun RatingCard(

@@ -15,7 +15,6 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.app.gameshelf.R
 import com.app.gameshelf.data.model.Achievement
+import com.app.gameshelf.data.repository.AuthRepository
 import com.app.gameshelf.ui.components.achievementCard.AchievementBottomSheet
 import com.app.gameshelf.ui.components.achievementCard.AchievementCard
 import com.app.gameshelf.ui.components.backButton.BackButton
@@ -51,7 +52,6 @@ fun GameDetailsScreen(
     gameId: String,
     category: String,
     name: String,
-    playerId: String = "76561199157114802",
     onBackClick: () -> Unit,
     viewModel: GameViewModel = viewModel()
 ) {
@@ -60,10 +60,13 @@ fun GameDetailsScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val authRepository = remember { AuthRepository(context) }
+    val steamId = remember { authRepository.getSteamId() ?: "" }
 
     LaunchedEffect(gameId, category) {
         if (category == "achievements") {
-            viewModel.loadAchievements(gameId, playerId)
+            viewModel.loadAchievements(gameId, steamId)
         }
     }
 
@@ -274,7 +277,6 @@ fun GameDetailsScreen(
                         items(
                             items = uiState.lockedAchievements,
                             key = { it.name },
-                            contentType = { "achievement" }
                         ) { item ->
                             AchievementCard(
                                 achievement = item,
@@ -285,18 +287,6 @@ fun GameDetailsScreen(
                             )
                         }
                     }
-                }
-
-                "lista" -> {
-                    // Conteúdo da tela de lista
-                }
-
-                "reviews" -> {
-                    // Conteúdo da tela de avaliações
-                }
-
-                "jogadores" -> {
-                    // Conteúdo da tela de mais informações
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.app.gameshelf.ui.navigation.routes
 
 sealed class Route(val route: String) {
 
+    object Signup : Route("signup")
     object Home : Route("home")
     object Search : Route("search")
     object News : Route("news")

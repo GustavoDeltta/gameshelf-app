@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -38,13 +39,8 @@ fun SearchScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(pad)
+                .padding(top = 12.dp)
         ) {
-            Row {
-                Text("oi")
-            }
-            Row {
-                Text("oi")
-            }
             when (val state = uiState) {
 
                 is SearchUiState.Loading -> {
@@ -81,7 +77,7 @@ fun SearchScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        androidx.compose.foundation.layout.Column(
+                        Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(

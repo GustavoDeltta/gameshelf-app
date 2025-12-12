@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,12 +67,11 @@ import coil.compose.AsyncImage
 import com.app.gameshelf.ui.components.backButton.BackButton
 import com.app.gameshelf.R
 import com.app.gameshelf.data.model.SteamRatings
+import com.app.gameshelf.data.repository.AuthRepository
 import com.app.gameshelf.ui.components.buttonAddTo.buttonAddTo
 import com.app.gameshelf.ui.components.highLightAchievements.HighLightAchievements
 import com.app.gameshelf.ui.components.ratingCard.RatingCard
 import com.app.gameshelf.ui.components.reviewCard.ReviewCardWithoutCover
-import com.app.gameshelf.ui.screens.gameDetails.GameDetailsUiState
-import com.app.gameshelf.ui.screens.gameDetails.GameDetailsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,8 +85,12 @@ fun GameScreen(
     val uiState by detailsViewModel.uiState.collectAsState()
     val scrollVertical = rememberScrollState()
 
+    val context = LocalContext.current
+    val authRepository = remember { AuthRepository(context) }
+    val steamId = remember { authRepository.getSteamId() ?: "" }
+
     LaunchedEffect(gameId) {
-        detailsViewModel.loadGameDetails(gameId)
+        detailsViewModel.loadGameDetails(gameId, steamId)
     }
 
     Column(
@@ -486,14 +490,21 @@ fun GameScreen(
                 ) {
                     when (selectedTab) {
                         0 -> SteamRatings( uiState = uiState)
-                        1 -> RatingCard(
-                            reviewScore0to5 = 4.3f,
-                            progressStar5 = 0.8f,
-                            progressStar4 = 0.6f,
-                            progressStar3 = 0.4f,
-                            progressStar2 = 0.2f,
-                            progressStar1 = 0.1f
-                        )
+                        1 -> {
+                            val gameRatings = uiState.gameData?.gameRatings
+                            val total = gameRatings?.total?.toFloat() ?: 0f
+                            val safeTotal = if (total > 0f) total else 1f
+                            val ratings = gameRatings?.ratings
+
+                            RatingCard(
+                                reviewScore0to5 = gameRatings?.average ?: 0f,
+                                progressStar5 = (ratings?.star5 ?: 0) / safeTotal,
+                                progressStar4 = (ratings?.star4 ?: 0) / safeTotal,
+                                progressStar3 = (ratings?.star3 ?: 0) / safeTotal,
+                                progressStar2 = (ratings?.star2 ?: 0) / safeTotal,
+                                progressStar1 = (ratings?.star1 ?: 0) / safeTotal
+                            )
+                        }
                     }
                 }
             }
@@ -582,16 +593,25 @@ fun GameScreen(
                     )
                 }
             }
-
-            ReviewCardWithoutCover(
-                profilePicture = "https://avatars.akamai.steamstatic.com/e35ae8607c0085bbde701cec3eff004c46e06e6f_full.jpg",
-                profileName = "GustavoDeltta",
-                backlog = "",
-                allAchievementsUnlocked = true,
-                hoursPlayed = 88.4f,
-                reviewScore = 5.0f,
-                reviewComent = "Simplesmente um dos melhores jogos da minha vida, todos os personas tem um espaço no meu coração, mas ...",
-            )
+            
+            val reviews = uiState.gameData?.reviews ?: emptyList()
+            
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                reviews.forEach { review ->
+                    ReviewCardWithoutCover(
+                        profilePicture = review.profilePicture,
+                        profileName = review.profileName,
+                        backlog = review.log ?: "",
+                        allAchievementsUnlocked = false,
+                        hoursPlayed = review.hoursPlayed.toFloatOrNull() ?: 0f,
+                        reviewScore = review.reviewScore.toFloat(),
+                        reviewComent = review.reviewComment
+                    )
+                }
+            }
         }
     }
 }

@@ -1,12 +1,14 @@
 package com.app.gameshelf.ui.screens.profile
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.app.gameshelf.R
 import com.app.gameshelf.ThemeState
+import com.app.gameshelf.data.repository.AuthRepository
 import com.app.gameshelf.utils.LocaleHelper
 import com.app.gameshelf.utils.PreferencesManager
 
@@ -26,6 +29,7 @@ import com.app.gameshelf.utils.PreferencesManager
 fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
     val prefsManager = remember { PreferencesManager(context) }
+    val authRepository = remember { AuthRepository(context) }
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
@@ -106,6 +110,37 @@ fun ProfileScreen(navController: NavController) {
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+
+        // Logout Button ------------------------------
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .clickable {
+                    authRepository.clearToken()
+                    Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                    // Restart navigation stack to signup
+                    navController.navigate("signup") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Logout",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            Icon(
+                imageVector = Icons.Default.ExitToApp,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
             )
         }
     }
