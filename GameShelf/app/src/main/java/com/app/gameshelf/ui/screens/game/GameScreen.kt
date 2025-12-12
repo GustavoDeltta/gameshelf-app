@@ -69,6 +69,7 @@ import com.app.gameshelf.data.model.SteamRatings
 import com.app.gameshelf.ui.components.buttonAddTo.buttonAddTo
 import com.app.gameshelf.ui.components.highLightAchievements.HighLightAchievements
 import com.app.gameshelf.ui.components.ratingCard.RatingCard
+import com.app.gameshelf.ui.components.reviewCard.ReviewCardWithoutCover
 import com.app.gameshelf.ui.screens.gameDetails.GameDetailsUiState
 import com.app.gameshelf.ui.screens.gameDetails.GameDetailsViewModel
 
@@ -378,7 +379,7 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 15.dp),
+                    .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -420,7 +421,7 @@ fun GameScreen(
                         .fillMaxWidth()
                         .height(180.dp)
                         .background(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            MaterialTheme.colorScheme.surface,
                             shape = MaterialTheme.shapes.small
                         )
                 )
@@ -448,9 +449,7 @@ fun GameScreen(
                 )
             }
 
-            // --------------------------------
-            //  Rating
-            // --------------------------------
+            //  Rating ------------------------------------------
 
             var selectedTab by remember { mutableStateOf(0) }
             val tabs = listOf("Steam", "Game Shelf")
@@ -499,11 +498,9 @@ fun GameScreen(
                 }
             }
 
-            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
+            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(bottom = 10.dp))
 
-            // --------------------------------
-            //  Images carousel
-            // --------------------------------
+            //  Images carousel ------------------------------------------
 
             val screenshots = uiState.gameData?.screenshots ?: emptyList()
             if (screenshots.isEmpty()) return
@@ -519,7 +516,7 @@ fun GameScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .background(Color.Gray.copy(alpha = 0.5f))
+                            .background(MaterialTheme.colorScheme.surface)
                     )
                 }
 
@@ -549,7 +546,52 @@ fun GameScreen(
                 }
             }
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Avaliações",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                )
 
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f)
+                } else {
+                    Text(
+                        text =
+                            if (uiState.gameData?.achievementsHighlights?.max == 0) ""
+                            else stringResource(R.string.seeAll),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.clickable {
+                            if (uiState.gameData?.achievementsHighlights?.max == 0)
+                                return@clickable
+
+                            onGameDetailsClick(
+                                "achievements",
+                                uiState.gameData?.name ?: ""
+                            )
+                        }
+                    )
+                }
+            }
+
+            ReviewCardWithoutCover(
+                profilePicture = "https://avatars.akamai.steamstatic.com/e35ae8607c0085bbde701cec3eff004c46e06e6f_full.jpg",
+                profileName = "GustavoDeltta",
+                backlog = "",
+                allAchievementsUnlocked = true,
+                hoursPlayed = 88.4f,
+                reviewScore = 5.0f,
+                reviewComent = "Simplesmente um dos melhores jogos da minha vida, todos os personas tem um espaço no meu coração, mas ...",
+            )
         }
     }
 }
