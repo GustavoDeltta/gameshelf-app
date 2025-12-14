@@ -1,9 +1,10 @@
-package com.app.gameshelf.ui.screens.gameDetails
+package com.app.gameshelf.ui.screens.game
 
-import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.gameshelf.data.model.GameDataApi
+import com.app.gameshelf.data.model.UserGameLog
 import com.app.gameshelf.data.repository.GameRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,18 +18,22 @@ data class GameDetailsUiState(
     val error: String? = null
 )
 
-class GameDetailsViewModel : ViewModel() {
+class GameDetailsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = GameRepository()
+    private val repository = GameRepository(application.applicationContext)
 
     private val _uiState = MutableStateFlow(GameDetailsUiState())
     val uiState: StateFlow<GameDetailsUiState> = _uiState.asStateFlow()
 
-    fun loadGameDetails(gameId: String) {
+    fun loadGameDetails(gameId: String, steamId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            // Only show full loading skeleton if we don't have data yet.
+            // This prevents the screen from flashing skeletons when updating the status.
+            if (_uiState.value.gameData == null) {
+                _uiState.update { it.copy(isLoading = true, error = null) }
+            }
 
-            val result = repository.getGameDetails(gameId)
+            val result = repository.getGameDetails(gameId, steamId)
 
             result.onSuccess { gameData ->
                 _uiState.update {
@@ -41,10 +46,20 @@ class GameDetailsViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = exception.message ?: "Erro ao carregar detalhes do jogo"
+                        error = exception.message ?: "Error unknown"
                     )
                 }
             }
+        }
+    }
+
+    fun updateLocalLogStatus(status: String) {
+        val currentGameData = _uiState.value.gameData ?: return
+        val updatedLog = UserGameLog(status = status)
+        val updatedGameData = currentGameData.copy(userGameLog = updatedLog)
+
+        _uiState.update {
+            it.copy(gameData = updatedGameData)
         }
     }
 }

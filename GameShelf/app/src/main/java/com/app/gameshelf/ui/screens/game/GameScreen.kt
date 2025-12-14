@@ -1,22 +1,26 @@
 package com.app.gameshelf.ui.screens.game
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -25,33 +29,51 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.app.gameshelf.ui.components.backButton.BackButton
 import com.app.gameshelf.R
+import com.app.gameshelf.data.model.SteamRatings
+import com.app.gameshelf.data.repository.AuthRepository
 import com.app.gameshelf.ui.components.buttonAddTo.buttonAddTo
 import com.app.gameshelf.ui.components.highLightAchievements.HighLightAchievements
-import com.app.gameshelf.ui.screens.gameDetails.GameDetailsViewModel
+import com.app.gameshelf.ui.components.ratingCard.RatingCard
+import com.app.gameshelf.ui.components.reviewCard.ReviewCardWithoutCover
+import com.app.gameshelf.ui.components.logBottomSheet.logBottomSheet
+import com.app.gameshelf.ui.components.reviewBottomSheet.ReviewBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,11 +84,17 @@ fun GameScreen(
     onGameDetailsClick: (String, String) -> Unit,
     detailsViewModel: GameDetailsViewModel = viewModel()
 ){
-    val detailsState by detailsViewModel.uiState.collectAsState()
+    val uiState by detailsViewModel.uiState.collectAsState()
     val scrollVertical = rememberScrollState()
 
+    val context = LocalContext.current
+    val authRepository = remember { AuthRepository(context) }
+    val steamId = remember { authRepository.getSteamId() ?: "" }
+    var showLogSheet by remember { mutableStateOf(false) }
+    var showReviewSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(gameId) {
-        detailsViewModel.loadGameDetails(gameId)
+        detailsViewModel.loadGameDetails(gameId, steamId)
     }
 
     Column(
@@ -85,7 +113,7 @@ fun GameScreen(
                     .fillMaxWidth()
                     .blur(2.dp)
                     .height(290.dp),
-                model = detailsState.gameData?.background,
+                model = "https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/header.jpg",
                 contentDescription = "Game Banner",
                 contentScale = ContentScale.Crop,
                 alignment = androidx.compose.ui.BiasAlignment(
@@ -129,8 +157,8 @@ fun GameScreen(
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         AsyncImage(
-                            model = detailsState.gameData?.cover,
-                            contentDescription = "Game cover",
+                            model = "https://cdn.cloudflare.steamstatic.com/steam/apps/${gameId}/library_600x900.jpg",
+                            contentDescription = stringResource(R.string.game_cover),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                         )
@@ -142,35 +170,42 @@ fun GameScreen(
                             .padding(start = 16.dp),
                         verticalArrangement = Arrangement.Bottom
                     ) {
-                        Text(
-                            text = detailsState.gameData?.name ?: "",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        if(uiState.isLoading){
+                            SkeletonLoading(with = 0.5f, modifier = Modifier.padding(bottom = 5.dp))
+                            SkeletonLoading(with = 0.35f, height = 15.dp)
+                            Spacer(modifier = Modifier.height(10.dp))
+                            repeat(4){
+                                SkeletonLoading(height = 15.dp, modifier = Modifier.padding(bottom = 5.dp))
+                            }
+                        } else {
+                            Text(
+                                text = uiState.gameData?.name ?: "",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
 
-                        Text(
-                            "2024 - ATLUS",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
+                            Text(
+                                uiState.gameData?.releaseDate?.date ?: "",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                        Text(
-                            text = detailsState.gameData?.description ?: "",
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                            textAlign = TextAlign.Justify,
-                        )
+                            Text(
+                                text = uiState.gameData?.description ?: "",
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Justify,
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // --------------------------------
-        //  Statistics of list, Players and Rating
-        // --------------------------------
+        //  Statistics of list, Players and Rating ---------------------------------
 
         Column(
             Modifier
@@ -179,8 +214,27 @@ fun GameScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Button backlog
-            val Status: String = "completed"
-            buttonAddTo(Status)
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .height(60.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    contentAlignment = Alignment.Center
+                ){
+                    SkeletonLoading(with = 0.5f)
+                }
+            } else {
+                buttonAddTo(
+                    status = uiState.gameData?.userGameLog?.status ?: "",
+                    onClick = { showLogSheet = true }
+                )
+            }
+
 
             // Developers and Publishers
             Row(
@@ -188,8 +242,8 @@ fun GameScreen(
                     .fillMaxWidth()
                     .padding(top = 10.dp)
                     .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = MaterialTheme.shapes.medium
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = MaterialTheme.shapes.medium
                     ),
                     horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -199,17 +253,21 @@ fun GameScreen(
                         .weight(0.5f)
                 ) {
                     Text(
-                        "Desenvolvedora",
+                        stringResource(R.string.developers),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
 
-                    Text(
-                        text = detailsState.gameData?.developers?.get(0) ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    if(uiState.isLoading){
+                        SkeletonLoading(with = 0.5f)
+                    }else {
+                        Text(
+                            text = uiState.gameData?.developers?.get(0) ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
 
                 Column(
@@ -219,17 +277,22 @@ fun GameScreen(
                     horizontalAlignment = androidx.compose.ui.Alignment.End
                 ) {
                     Text(
-                        "Distribuidora",
+                        stringResource(R.string.publishers),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
-                    Text(
-                        text = detailsState.gameData?.publishers?.get(0) ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.End
-                    )
+
+                    if(uiState.isLoading){
+                        SkeletonLoading(with = 0.8f)
+                    }else{
+                        Text(
+                            text = uiState.gameData?.publishers?.get(0) ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.End
+                        )
+                    }
                 }
             }
 
@@ -244,23 +307,23 @@ fun GameScreen(
 
             val infoList = listOf(
                 InfoItem(
-                    quant = "1.2k",
-                    category = "Lista",
-                    Description = "Jogos que estão na sua lista",
+                    quant = uiState.gameData?.gameListsCount.toString(),
+                    category = stringResource(R.string.list),
+                    Description = stringResource(R.string.listDescription),
                     iconRes = R.drawable.ic_list,
                     color = MaterialTheme.colorScheme.secondary
                 ),
                 InfoItem(
-                    quant = "1.9k",
-                    category = "Avaliações",
-                    Description = "Avaliações de jogos",
+                    quant = uiState.gameData?.reviewsCount.toString(),
+                    category = stringResource(R.string.reviews),
+                    Description = stringResource(R.string.reviewsDescription),
                     iconRes = R.drawable.ic_reviews,
                     color = MaterialTheme.colorScheme.onPrimary
                 ),
                 InfoItem(
-                    quant = "26k",
-                    category = "Jogadores",
-                    Description = "Jogadores que jogaram",
+                    quant = uiState.gameData?.playingCount.toString(),
+                    category = stringResource(R.string.players),
+                    Description = stringResource(R.string.playersDescription),
                     iconRes = R.drawable.ic_control,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -268,8 +331,8 @@ fun GameScreen(
 
             Row(
             modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
+                .fillMaxWidth()
+                .padding(top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 infoList.forEach { info ->
@@ -279,7 +342,7 @@ fun GameScreen(
                             .clickable {
                                 onGameDetailsClick(
                                     info.category,
-                                    detailsState.gameData?.name ?: ""
+                                    uiState.gameData?.name ?: ""
                                 )
                             }
                             .background(
@@ -290,13 +353,17 @@ fun GameScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            info.quant,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 20.sp
-                        )
+                        if(uiState.isLoading){
+                            SkeletonLoading(with = 0.5f)
+                        } else {
+                            Text(
+                                info.quant,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 20.sp
+                            )
+                        }
 
                         Row(
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
@@ -322,103 +389,138 @@ fun GameScreen(
 
             Row(
                 modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 15.dp),
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Conquistas",
+                    stringResource(R.string.achievements),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
                 )
 
-                Text(
-                    "ver todas",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                    modifier = Modifier.clickable {
-                        onGameDetailsClick(
-                            "conquistas",
-                            detailsState.gameData?.name ?: ""
-                        )
-                    }
-                )
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f)
+                } else {
+                    Text(
+                        text =
+                            if (uiState.gameData?.achievementsHighlights?.max == 0) ""
+                            else stringResource(R.string.seeAll),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.clickable {
+                            if (uiState.gameData?.achievementsHighlights?.max == 0)
+                                return@clickable
+
+                            onGameDetailsClick(
+                                "achievements",
+                                uiState.gameData?.name ?: ""
+                            )
+                        }
+                    )
+                }
             }
 
-            // --------------------------------
-            //  Achievements
-            // --------------------------------
+            //  Achievements --------------------------------
 
-            if (detailsState.isLoading){
+            if (uiState.isLoading){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
-                        .background(Color.Gray.copy(alpha = 0.5f))
+                        .height(180.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.small
+                        )
                 )
             }
 
             else {
                 HighLightAchievements(
                     onClickListener = {
+                        if (uiState.gameData?.achievementsHighlights?.max == 0)
+                            return@HighLightAchievements
+
                         onGameDetailsClick(
-                            "conquistas",
-                            detailsState.gameData?.name ?: ""
+                            "achievements",
+                            uiState.gameData?.name ?: ""
                         )
                     },
                     gameID = gameId,
-                    unLocked = detailsState.gameData?.achievementsHighlights?.achieved ?: 0,
-                    locked = detailsState.gameData?.achievementsHighlights?.max ?: 0,
-                    progress = detailsState.gameData?.achievementsHighlights?.getProgressPercentage() ?: 0f,
-                    lastUnlockedImage = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.img ?: "",
-                    lastUnlockedName = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.name ?: "",
-                    lastUnlockedDescription = detailsState.gameData?.achievementsHighlights?.lastUnlocked?.description ?: "",
-                    listOfLastUnlocked = detailsState.gameData?.achievementsHighlights?.lastFive ?: emptyList()
+                    unLocked = uiState.gameData?.achievementsHighlights?.achieved ?: 0,
+                    locked = uiState.gameData?.achievementsHighlights?.max ?: 0,
+                    progress = uiState.gameData?.achievementsHighlights?.getProgressPercentage() ?: 0f,
+                    lastUnlockedImage = uiState.gameData?.achievementsHighlights?.lastUnlocked?.img ?: "",
+                    lastUnlockedName = uiState.gameData?.achievementsHighlights?.lastUnlocked?.name ?: "",
+                    lastUnlockedDescription = uiState.gameData?.achievementsHighlights?.lastUnlocked?.description ?: "",
+                    listOfLastUnlocked = uiState.gameData?.achievementsHighlights?.lastFive ?: emptyList()
                 )
             }
 
-            // --------------------------------
-            //  Rating
-            // --------------------------------
+            //  Rating ------------------------------------------
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 15.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            var selectedTab by remember { mutableStateOf(0) }
+            val tabs = listOf("Steam", "Game Shelf")
+
+            Column(
+                modifier = Modifier.fillMaxSize().padding(top = 10.dp)
             ) {
-                Text(
-                    "Notas",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(end = 20.dp)
-                )
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    fontWeight = if (selectedTab == index) FontWeight.Medium else FontWeight.Normal,
+                                    color = if (selectedTab == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 16.dp)
+                ) {
+                    when (selectedTab) {
+                        0 -> SteamRatings( uiState = uiState)
+                        1 -> {
+                            val gameRatings = uiState.gameData?.gameRatings
+                            val total = gameRatings?.total?.toFloat() ?: 0f
+                            val safeTotal = if (total > 0f) total else 1f
+                            val ratings = gameRatings?.ratings
 
-                HorizontalDivider(thickness = 2.dp)
+                            RatingCard(
+                                reviewScore0to5 = gameRatings?.average ?: 0f,
+                                progressStar5 = (ratings?.star5 ?: 0) / safeTotal,
+                                progressStar4 = (ratings?.star4 ?: 0) / safeTotal,
+                                progressStar3 = (ratings?.star3 ?: 0) / safeTotal,
+                                progressStar2 = (ratings?.star2 ?: 0) / safeTotal,
+                                progressStar1 = (ratings?.star1 ?: 0) / safeTotal
+                            )
+                        }
+                    }
+                }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background( color = MaterialTheme.colorScheme.surface )
-                    .padding(bottom = 10.dp)
-                    .height(100.dp),
-            ) {
-                // codigo das notas
-            }
+            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(bottom = 10.dp))
 
-            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 10.dp))
+            //  Images carousel ------------------------------------------
 
-            // --------------------------------
-            //  Images carousel
-            // --------------------------------
-
-            val screenshots = detailsState.gameData?.screenshots ?: emptyList()
+            val screenshots = uiState.gameData?.screenshots ?: emptyList()
             if (screenshots.isEmpty()) return
 
             val carouselState = rememberCarouselState { screenshots.size }
@@ -427,12 +529,12 @@ fun GameScreen(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                if (detailsState.isLoading){
+                if (uiState.isLoading){
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .background(Color.Gray.copy(alpha = 0.5f))
+                            .background(MaterialTheme.colorScheme.surface)
                     )
                 }
 
@@ -460,11 +562,246 @@ fun GameScreen(
                         )
                     }
                 }
-
-
             }
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Avaliações",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                )
 
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f)
+                } else {
+                    Text(
+                        text =
+                            if (uiState.gameData?.achievementsHighlights?.max == 0) ""
+                            else stringResource(R.string.seeAll),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        modifier = Modifier.clickable {
+                            if (uiState.gameData?.achievementsHighlights?.max == 0)
+                                return@clickable
+
+                            onGameDetailsClick(
+                                "achievements",
+                                uiState.gameData?.name ?: ""
+                            )
+                        }
+                    )
+                }
+            }
+            
+            val reviews = uiState.gameData?.reviews ?: emptyList()
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                reviews.forEach { review ->
+                    ReviewCardWithoutCover(
+                        profilePicture = review.profilePicture,
+                        profileName = review.profileName,
+                        backlog = review.log ?: "",
+                        allAchievementsUnlocked = false,
+                        hoursPlayed = review.hoursPlayed.toFloatOrNull() ?: 0f,
+                        reviewScore = review.reviewScore.toFloat(),
+                        reviewComent = review.reviewComment
+                    )
+                }
+            }
         }
     }
+    
+    if (showLogSheet) {
+        logBottomSheet(
+            steamId = steamId,
+            gameID = gameId,
+            onDismiss = { showLogSheet = false },
+            onStatusUpdate = { newStatus ->
+                detailsViewModel.updateLocalLogStatus(newStatus)
+                showLogSheet = false
+            },
+            onReviewClick = {
+                showLogSheet = false
+                showReviewSheet = true
+            }
+        )
+    }
+
+    if (showReviewSheet) {
+        ReviewBottomSheet(
+            gameId = gameId,
+            gameName = uiState.gameData?.name ?: "",
+            onDismiss = { showReviewSheet = false }
+        )
+    }
+}
+
+@Composable
+fun SteamRatings(
+    uiState: GameDetailsUiState
+){
+    val reviewScore = uiState.gameData?.steamRatings?.reviewScore ?: 0.0
+
+    val color: Color = when {
+        reviewScore <= 1.5 -> MaterialTheme.colorScheme.primary
+        reviewScore <= 2.5 -> MaterialTheme.colorScheme.secondary
+        reviewScore <= 3.5 -> MaterialTheme.colorScheme.tertiary
+        reviewScore <= 4.5 -> MaterialTheme.colorScheme.onSecondary
+        else -> MaterialTheme.colorScheme.onPrimary
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(0.4f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Total",
+                style = MaterialTheme.typography.labelMedium
+            )
+
+            if(uiState.isLoading){
+                SkeletonLoading(with = 0.5f, height = 36.dp)
+            } else {
+                Text(
+                    text = reviewScore.toString(),
+                    color = color,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+
+        VerticalDivider( thickness = 2.dp)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (uiState.isLoading){
+                SkeletonLoading(with = 0.5f, height = 15.dp)
+            } else {
+                Text(
+                    text = uiState.gameData?.steamRatings?.reviewScoreDesc ?: "",
+                    color = color,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Row(){
+                Text(
+                    text = stringResource(R.string.steamReview) + " ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                )
+
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f, height = 15.dp)
+                } else {
+                    Text(
+                        text = uiState.gameData?.steamRatings?.totalReviews.toString(),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
+            Row(){
+                Text(
+                    text = stringResource(R.string.steamPositive) + " ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                )
+
+                if(uiState.isLoading){
+                    SkeletonLoading(with = 0.5f, height = 15.dp)
+                } else {
+                    Text(
+                        text = uiState.gameData?.steamRatings?.totalPositive.toString(),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+
+            Row(){
+                Text(
+                    text = stringResource(R.string.steamNegative) + " ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                )
+
+                if (uiState.isLoading){
+                    SkeletonLoading(with = 0.5f, height = 15.dp)
+                } else {
+                    Text(
+                        text = uiState.gameData?.steamRatings?.totalNegative.toString(),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SkeletonLoading(
+    modifier: Modifier = Modifier,
+    with: Float = 1f,
+    height: Dp = 25.dp
+){
+    val infiniteTransition = rememberInfiniteTransition()
+    val localConfig = LocalConfiguration.current
+    val target = (localConfig.screenWidthDp * 3).toFloat()
+
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = target,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1000),
+                repeatMode = RepeatMode.Restart,
+            ), label = "shimmer"
+    )
+
+    val skeletonColor = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = 0f),
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            MaterialTheme.colorScheme.primary.copy(alpha = 0f)
+        ),
+        end = Offset(x = scale, y = 0f)
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth(with)
+            .background(
+                skeletonColor,
+                shape = MaterialTheme.shapes.small
+            )
+            .height(height)
+    )
 }

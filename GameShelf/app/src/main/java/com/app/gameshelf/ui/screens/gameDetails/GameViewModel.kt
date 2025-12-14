@@ -1,6 +1,8 @@
 package com.app.gameshelf.ui.screens.gameDetails
 
-import androidx.lifecycle.ViewModel
+import android.R
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.gameshelf.data.model.Achievement
 import com.app.gameshelf.data.repository.GameRepository
@@ -19,9 +21,9 @@ data class AchievementsUiState(
     val error: String? = null
 )
 
-class GameViewModel : ViewModel() {
+class GameViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = GameRepository()
+    private val repository = GameRepository(application.applicationContext)
 
     private val _uiState = MutableStateFlow(AchievementsUiState())
     val uiState: StateFlow<AchievementsUiState> = _uiState.asStateFlow()

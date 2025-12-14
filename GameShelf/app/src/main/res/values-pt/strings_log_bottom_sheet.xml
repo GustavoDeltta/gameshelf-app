@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Log Bottom Sheet -->
+    <string name="add_to_desc">Para ficar sem categoria.</string>
+    <string name="finished_desc">Para jogos completados.</string>
+    <string name="playing_desc">Para jogos que está jogando.</string>
+    <string name="backlog_desc">Para jogos a serem jogados.</string>
+    <string name="dropped_desc">Para jogos que foram abandonados.</string>
+
+    <string name="add_to_collection">Lista</string>
+    <string name="add_to_collection_desc">Adicionar este jogo a uma coleção.</string>
+
+    <string name="review">Avaliar</string>
+    <string name="review_desc">O que você achou do jogo?</string>
+
+</resources>

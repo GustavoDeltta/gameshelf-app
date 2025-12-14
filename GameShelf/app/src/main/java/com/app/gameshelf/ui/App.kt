@@ -23,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.app.gameshelf.ui.components.navBar.NavBar
 import com.app.gameshelf.ui.navigation.AppNavGraph
+import com.app.gameshelf.ui.screens.signup.SignupScreen
 
 @Composable
 fun App() {

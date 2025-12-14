@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="game_cover">Game cover</string>
+
+    <!-- Devs Info -->
+    <string name="developers">Developers</string>
+    <string name="publishers">Publishers</string>
+
+    <!-- Statistics -->
+    <string name="list">List</string>
+    <string name="listDescription">Games that are on your list</string>
+
+    <string name="reviews">Reviews</string>
+    <string name="reviewsDescription">Game reviews</string>
+
+    <string name="players">Players</string>
+    <string name="playersDescription">Players that played the game</string>
+
+    <!-- Achievements -->
+    <string name="achievements">Achievements</string>
+    <string name="seeAll">see all</string>
+
+    <!-- Rating -->
+    <string name="steamReview">Reviews: </string>
+    <string name="steamPositive">Positives: </string>
+    <string name="steamNegative">Negatives: </string>
+
+</resources>

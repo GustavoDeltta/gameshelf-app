@@ -1,7 +1,9 @@
 package com.app.gameshelf.ui.screens.search
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.gameshelf.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,23 +23,20 @@ sealed class SearchUiState {
     data class Error(val message: String) : SearchUiState()
 }
 
-class SearchViewModel : ViewModel() {
+class SearchViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Loading)
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
     private val gamesCache = mutableMapOf<String, GameData>()
+    private val authRepository = AuthRepository(application)
 
     init {
         loadGames()
     }
 
     fun loadGames() {
-        val gameIds = listOf(
-            "2161700", "730", "570", "578080", "271590", "1172470",
-            "1091500", "892970", "1085660", "1245620", "230410",
-            "346110", "2050650", "447040"
-        )
+        val gameIds = authRepository.getOwnedGames().map { it.toString() }
 
         viewModelScope.launch {
             _uiState.value = SearchUiState.Loading

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Achievements Card -->
+    <string name="hiddenAchievement">Conquista ocultada</string>
+    <string name="hiddenAchievementDescription">Detalhes ocultos, clique para exibir spoiler da conquista</string>
+    <string name="globalPercentage">Porcentagem global dos jogadores:</string>
+
+    <!-- BackLog buttton -->
+    <string name="addTo">Adicionar à</string>
+    <string name="playing">Jogando</string>
+    <string name="completed">Zerado</string>
+    <string name="backlog">Lista</string>
+
+    <!-- HighLight Achievements -->
+    <string name="noAchievementsUnlocked">Nenhuma conquista desbloqueada</string>
+    <string name="withoutAchievements">Sem conquistas</string>
+    <string name="noAchievementsUnlockedDescription">Jogue e desbloquie conquistas</string>
+    <string name="withoutAchievementsDescription">Esse jogo não possui conquistas</string>
+
+    <string name="platinum">PLATINA</string>
+    <string name="achieved">ALCANÇADA</string>
+</resources>

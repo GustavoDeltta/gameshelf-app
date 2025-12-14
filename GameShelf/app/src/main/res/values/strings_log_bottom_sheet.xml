@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Log Bottom Sheet -->
+    <string name="add_to_desc">For stay without category.</string>
+    <string name="finished_desc">For completed games.</string>
+    <string name="playing_desc">For playing games.</string>
+    <string name="backlog_desc">For games to be played.</string>
+    <string name="dropped_desc">For games that were dropped.</string>
+
+    <string name="add_to_collection">List</string>
+    <string name="add_to_collection_desc">Add this game on a collection.</string>
+
+    <string name="review">Review</string>
+    <string name="review_desc">What did you think of the game?</string>
+
+</resources>
